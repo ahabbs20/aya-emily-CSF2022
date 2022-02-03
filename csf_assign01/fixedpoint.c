@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
@@ -28,8 +29,65 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-  // TODO: implement
-  assert(0);
+  bool isNegative = false;
+  int start = 0;
+  int endOfWhole = 0;
+  uint64_t whole = 0;
+  uint64_t frac = 0;
+  bool isValid = true;
+
+  if (*hex == '-') {
+    isNegative = true;
+    start = 1;
+  }
+
+
+  int i = 0;
+  while ((*(hex + i) != '.') || (*(hex + i) != '/0')) {
+    i++;
+  }
+
+  endOfWhole = i - 1;
+
+  for (i = endOfWhole; i >= start; i--) {
+    isValid = validateChar(*(hex + i));
+
+    if (!isValid) {
+      whole = 0;
+      break;
+    }
+
+    //update
+
+  }
+  
+  if (isValid && (*(hex + endOfWhole + 1) == '.')) {
+    for (i = endOfWhole + 2; *(hex + i) != '/0'; i++) {
+      isValid = validateChar(*(hex + i));
+
+      if (!isValid) {
+        frac = 0;
+        whole = 0;
+        break;
+      }
+
+      //update
+
+    }
+  }
+
+
+  // GET RID OF LATER
+  return create_fixedpoint_hex(isValid, whole, frac, isNegative);
+}
+
+// emily = validate 
+
+// aya = update
+
+
+Fixedpoint create_fixedpoint_hex(bool isValid, uint64_t whole, uint64_t frac, bool isNegative) {
+
   return DUMMY;
 }
 
@@ -44,36 +102,42 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
    return val.frac;
 }
 
+// Emily
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   // TODO: implement
   assert(0);
   return DUMMY;
 }
 
+// Emily
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   // TODO: implement
   assert(0);
   return DUMMY;
 }
 
+// aya
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return DUMMY;
 }
 
+// Aya
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return DUMMY;
 }
 
+// Aya
 Fixedpoint fixedpoint_double(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return DUMMY;
 }
 
+// emily
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   // TODO: implement
   assert(0);
@@ -88,48 +152,57 @@ int fixedpoint_is_zero(Fixedpoint val) {
   }
 }
 
+// aya
 int fixedpoint_is_err(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return 0;
 }
 
+// emily
 int fixedpoint_is_neg(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return 0;
 }
 
+// Aya
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return 0;
 }
 
+// Emily
 int fixedpoint_is_overflow_pos(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return 0;
 }
 
+// Aya
 int fixedpoint_is_underflow_neg(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return 0;
 }
 
+// Emily
 int fixedpoint_is_underflow_pos(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return 0;
 }
 
+// Aya
 int fixedpoint_is_valid(Fixedpoint val) {
   // TODO: implement
   assert(0);
   return 0;
 }
 
+
+// Pair code together
 char *fixedpoint_format_as_hex(Fixedpoint val) {
   // TODO: implement
   assert(0);
