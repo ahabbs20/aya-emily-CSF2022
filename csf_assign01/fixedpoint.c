@@ -82,6 +82,22 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
 }
 
 // emily = validate 
+bool validateChar(char toValidate) {
+  bool toReturn = true;
+
+  if (toValidate < 'a' || toValidate > 'f') {
+    toReturn = false;
+  }
+
+  if (toValidate < '0' || toValidate > '9') {
+    toReturn = false;
+  } else {
+    toReturn = true;
+  }
+
+  return toReturn;
+}
+
 
 // aya = update
 
