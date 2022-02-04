@@ -18,8 +18,6 @@ Fixedpoint fixedpoint_create(uint64_t whole) {
 }
 
 Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
-  // TODO: implement
- 
   Fixedpoint newFixedPoint = (Fixedpoint) { .whole = whole, .frac = frac,
 					    .sign = positive, .overflow = notOver,
 					    .underflow = notOver, .validity = valid};
@@ -108,13 +106,10 @@ Fixedpoint create_fixedpoint_hex(bool isValid, uint64_t whole, uint64_t frac, bo
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
-  // TODO: implement
-
   return val.whole;
 }
 
 uint64_t fixedpoint_frac_part(Fixedpoint val) {
-  // TODO: implement
    return val.frac;
 }
 
@@ -177,8 +172,9 @@ int fixedpoint_is_err(Fixedpoint val) {
 
 // emily
 int fixedpoint_is_neg(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
+  if ((val.validity == valid) && (val.sign == negative)) {
+    return 1;
+  }
   return 0;
 }
 
