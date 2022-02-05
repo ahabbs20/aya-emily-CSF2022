@@ -49,16 +49,13 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
     start = 1;
   }
 
-
   char *end;
-
   whole = strtoul(hex + start, &end, 16);
 
   // check to see if whole is valid.
-  if ((*end != '.') && (*end != '\0')) {
+  if ((end - (hex + start)) > 16 || ((*end != '.') && (*end != '\0'))) {
     return fixedpoint_create_3(0UL, 0UL, isNegative, 1);
   }
-
   else if (*end == '.') {
     // create appropriate padding
     int length = strlen(end + 1);
@@ -66,10 +63,12 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
       length = 16 - length;
     }
 
-    frac = strtoul(end + 1, &end, 16);
+    start = (end - hex) + 1;
+
+    frac = strtoul(hex + start, &end, 16);
     frac = frac << length * 4;
 
-    if (*end != '\0') {
+    if ((end - (hex + start)) > 16 || *end != '\0') {
       return fixedpoint_create_3(0UL, 0UL, isNegative, 1);
     }
   }
@@ -77,9 +76,6 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   return fixedpoint_create_3(whole, frac, isNegative, 0);
 
 }
-
-
-
 
 // emily = validate 
 // It also includes uppercase, will edit later
@@ -167,7 +163,7 @@ int fixedpoint_is_err(Fixedpoint val) {
 // emily
 int fixedpoint_is_neg(Fixedpoint val) {
   if ((val.validity == valid) && (val.sign == negative)) {
-    return 1;
+    return !fixedpoint_is_zero(val);
   }
   return 0;
 }

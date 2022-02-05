@@ -45,11 +45,11 @@ int main(int argc, char **argv) {
   //TEST(test_frac_part);
   TEST(test_create_from_hex);
   // TEST(test_format_as_hex);
-  // TEST(test_negate);
+  TEST(test_negate);
   // TEST(test_add);
   // TEST(test_sub);
   // TEST(test_is_overflow_pos);
-  // TEST(test_is_err);
+  TEST(test_is_err);
 
   // IMPORTANT: if you add additional test functions (which you should!),
   // make sure they are included here.  E.g., if you add a test function
@@ -263,34 +263,43 @@ void test_is_overflow_pos(TestObjs *objs) {
 void test_is_err(TestObjs *objs) {
   (void) objs;
 
+
   // too many characters
   Fixedpoint err1 = fixedpoint_create_from_hex("88888888888888889.6666666666666666");
   ASSERT(fixedpoint_is_err(err1));
-
+  
+  
   // too many characters
   Fixedpoint err2 = fixedpoint_create_from_hex("6666666666666666.88888888888888889");
   ASSERT(fixedpoint_is_err(err2));
 
+  
   // this one is actually fine
   Fixedpoint err3 = fixedpoint_create_from_hex("-6666666666666666.8888888888888888");
   ASSERT(fixedpoint_is_valid(err3));
   ASSERT(!fixedpoint_is_err(err3));
 
+  
+
   // whole part is too large
   Fixedpoint err4 = fixedpoint_create_from_hex("88888888888888889");
   ASSERT(fixedpoint_is_err(err4));
 
+  
   // fractional part is too large
   Fixedpoint err5 = fixedpoint_create_from_hex("7.88888888888888889");
   ASSERT(fixedpoint_is_err(err5));
 
+  
   // invalid hex digits in whole part
   Fixedpoint err6 = fixedpoint_create_from_hex("123xabc.4");
   ASSERT(fixedpoint_is_err(err6));
 
+  
   // invalid hex digits in fractional part
   Fixedpoint err7 = fixedpoint_create_from_hex("7.0?4");
   ASSERT(fixedpoint_is_err(err7));
+  
 }
 
 // TODO: implement more test functions
