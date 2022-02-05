@@ -80,6 +80,7 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
 }
 
 // emily = validate 
+// It also includes uppercase, will edit later
 bool validateChar(char toValidate) {
   bool toReturn = true;
 
@@ -181,37 +182,35 @@ int fixedpoint_is_neg(Fixedpoint val) {
 // Aya
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
   // TODO: implement
-  assert(0);
-  return 0;
+  return (val.overflow == under) && (val.sign == negative);;
 }
 
 // Emily
 int fixedpoint_is_overflow_pos(Fixedpoint val) {
   // TODO: implement
-  assert(0);
-  return 0;
+  return (val.overflow == under) && (val.sign == positive);
 }
 
 // Aya
 int fixedpoint_is_underflow_neg(Fixedpoint val) {
   // TODO: implement
-  assert(0);
-  return 0;
+  return (val.underflow == under) && (val.sign == negative);
 }
 
 // Emily
 int fixedpoint_is_underflow_pos(Fixedpoint val) {
   // TODO: implement
-  assert(0);
-  return 0;
+  return (val.underflow == under) && (val.sign == positive);
 }
 
 // Aya
 int fixedpoint_is_valid(Fixedpoint val) {
   // TODO: implement
-  assert(0);
-  return 0;
+  
+
+  return (val.overflow == over) || (val.underflow == under) || (val.validity == invalid);
 }
+
 
 
 // Pair code together
