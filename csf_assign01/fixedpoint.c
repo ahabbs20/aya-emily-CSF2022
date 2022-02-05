@@ -26,95 +26,56 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
   return newFixedPoint;
 }
 
-Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-  
 
-  bool isNegative = false;
-  int start = 0;
-  int endOfWhole = 0;
-  uint64_t whole = 0;
-  uint64_t frac = 0;
-  bool isValid = true;
-  
-  // check to see if negative
-  if (*hex == '-') {
-    isNegative = true;
-    start = 1;
-  }
+Fixedpoint fixedpoint_create_3(uint64_t whole, uint64_t frac, bool isNegative, int isValid) {
+  int sign = isNegative;
 
-
-  // check to see if string is negative.
-  // attempt to convert
-    // if it returns a 0 and the value is NOT 0, then it is invalid.
-  // if it is still valid, then, check if char is .
-    // if char is not '.', then set frac = 0;
-    // if char is '.' then
-      // attempt to convert
-      // if it returns a 0 and the value is NOT 0, then it is invalid.
-  // check if is valid
-    //if valid -> create
-    //return invalid fixedpoint
-
-  
-
-
-
+  return (Fixedpoint) { .whole = whole, .frac = frac,
+					    .sign = sign, .overflow = notOver,
+					    .underflow = notUnder, .validity = isValid};
 
 }
 
-/*
+
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   bool isNegative = false;
   int start = 0;
-  int endOfWhole = 0;
   uint64_t whole = 0;
   uint64_t frac = 0;
-  bool isValid = true;
-
+  
+  // check to see if negative
   if (*hex == '-') {
-    isNegative = true;
+    isNegative = true;  
     start = 1;
   }
 
+  char *end;
 
-  int i = 0;
-  while ((*(hex + i) != '.') || (*(hex + i) != '/0')) {
-    i++;
+  whole = strtoul(hex + start, &end, 16);
+  printf("\n%lu and %c\n", whole, *end);
+
+  // check to see if whole is valid.
+  if ((*end != '.') && (*end != '\0')) {
+    return fixedpoint_create_3(0UL, 0UL, isNegative, 1);
   }
 
-  endOfWhole = i - 1;
+  else if (*end == '.') {
+    frac = strtoul(end + 1, &end, 16);
 
-  for (i = endOfWhole; i >= start; i--) {
-    isValid = validateChar(*(hex + i));
+    printf("\n%lu and %c\n", frac, *end);
 
-    if (!isValid) {
-      whole = 0;
-      break;
-    }
-
-    //update
-
-  }
-  
-  if (isValid && (*(hex + endOfWhole + 1) == '.')) {
-    for (i = endOfWhole + 2; *(hex + i) != '/0'; i++) {
-      isValid = validateChar(*(hex + i));
-
-      if (!isValid) {
-        frac = 0;
-        whole = 0;
-        break;
-      }
-
-      //update
-
+  // check to see if whole is valid.
+    if (*end != '\0') {
+      return fixedpoint_create_3(0UL, 0UL, isNegative, 1);
     }
   }
 
+  return fixedpoint_create_3(whole, frac, isNegative, 0);
 
-  // GET RID OF LATER
-  return create_fixedpoint_hex(isValid, whole, frac, isNegative);
-}*/
+}
+
+
+
 
 // emily = validate 
 // It also includes uppercase, will edit later
@@ -133,13 +94,6 @@ bool validateChar(char toValidate) {
 
 
 // aya = update
-
-
-Fixedpoint create_fixedpoint_hex(bool isValid, uint64_t whole, uint64_t frac, bool isNegative) {
-
-  return DUMMY;
-}
-
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
   return val.whole;
 }
@@ -148,7 +102,8 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
    return val.frac;
 }
 
-// Emily
+
+// Emil
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   // TODO: implement
   assert(0);
@@ -189,6 +144,7 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   assert(0);
   return 0;
 }
+
 
 int fixedpoint_is_zero(Fixedpoint val) {
   if ((val.validity == valid) && (val.whole == 0) && (val.frac == 0)) {
@@ -254,3 +210,4 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
   strcpy(s, "<invalid>");
   return s;
 }
+
