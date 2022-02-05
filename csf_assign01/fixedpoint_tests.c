@@ -107,7 +107,6 @@ void test_create_from_hex(TestObjs *objs) {
   Fixedpoint val1 = fixedpoint_create_from_hex("f6a5865.00f2");
   ASSERT(fixedpoint_is_valid(val1));
   ASSERT(0xf6a5865UL == fixedpoint_whole_part(val1));
-  printf("\n%lu\n", 0x00f2000000000000UL);
   ASSERT(0x00f2000000000000UL == fixedpoint_frac_part(val1));
 
 

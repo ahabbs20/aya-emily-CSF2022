@@ -49,10 +49,10 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
     start = 1;
   }
 
+
   char *end;
 
   whole = strtoul(hex + start, &end, 16);
-  printf("\n%lu and %c\n", whole, *end);
 
   // check to see if whole is valid.
   if ((*end != '.') && (*end != '\0')) {
@@ -60,11 +60,15 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   }
 
   else if (*end == '.') {
+    // create appropriate padding
+    int length = strlen(end + 1);
+    if (length < 16) {
+      length = 16 - length;
+    }
+
     frac = strtoul(end + 1, &end, 16);
+    frac = frac << length * 4;
 
-    printf("\n%lu and %c\n", frac, *end);
-
-  // check to see if whole is valid.
     if (*end != '\0') {
       return fixedpoint_create_3(0UL, 0UL, isNegative, 1);
     }
