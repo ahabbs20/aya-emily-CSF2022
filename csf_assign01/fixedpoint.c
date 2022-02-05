@@ -213,12 +213,14 @@ int fixedpoint_is_neg(Fixedpoint val) {
 }
 
 // Aya
+// Should this be val.overflow == over?
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
   // TODO: implement
   return (val.overflow == under) && (val.sign == negative);;
 }
 
 // Emily
+// Should this be val.overflow == over?
 int fixedpoint_is_overflow_pos(Fixedpoint val) {
   // TODO: implement
   return (val.overflow == under) && (val.sign == positive);
