@@ -27,6 +27,43 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
+  
+
+  bool isNegative = false;
+  int start = 0;
+  int endOfWhole = 0;
+  uint64_t whole = 0;
+  uint64_t frac = 0;
+  bool isValid = true;
+  
+  // check to see if negative
+  if (*hex == '-') {
+    isNegative = true;
+    start = 1;
+  }
+
+
+  // check to see if string is negative.
+  // attempt to convert
+    // if it returns a 0 and the value is NOT 0, then it is invalid.
+  // if it is still valid, then, check if char is .
+    // if char is not '.', then set frac = 0;
+    // if char is '.' then
+      // attempt to convert
+      // if it returns a 0 and the value is NOT 0, then it is invalid.
+  // check if is valid
+    //if valid -> create
+    //return invalid fixedpoint
+
+  
+
+
+
+
+}
+
+/*
+Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   bool isNegative = false;
   int start = 0;
   int endOfWhole = 0;
@@ -77,7 +114,7 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
 
   // GET RID OF LATER
   return create_fixedpoint_hex(isValid, whole, frac, isNegative);
-}
+}*/
 
 // emily = validate 
 // It also includes uppercase, will edit later
@@ -131,8 +168,8 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
 // aya
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
   // TODO: implement
-  assert(0);
-  return DUMMY;
+  val.sign = negative;
+  return val;
 }
 
 // Aya
