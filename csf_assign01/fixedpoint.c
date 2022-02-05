@@ -167,8 +167,7 @@ int fixedpoint_is_zero(Fixedpoint val) {
 // aya
 int fixedpoint_is_err(Fixedpoint val) {
   // TODO: implement
-  assert(0);
-  return 0;
+  return (val.overflow == over) || (val.underflow == under) || (val.validity == invalid);
 }
 
 // emily
@@ -208,7 +207,7 @@ int fixedpoint_is_valid(Fixedpoint val) {
   // TODO: implement
   
 
-  return (val.overflow == over) || (val.underflow == under) || (val.validity == invalid);
+  return val.validity == valid;
 }
 
 
