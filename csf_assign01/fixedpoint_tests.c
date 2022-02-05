@@ -41,9 +41,9 @@ int main(int argc, char **argv) {
 
   TEST_INIT();
 
-  TEST(test_whole_part);
-  TEST(test_frac_part);
-  // TEST(test_create_from_hex);
+  //TEST(test_whole_part);
+  //TEST(test_frac_part);
+  TEST(test_create_from_hex);
   // TEST(test_format_as_hex);
   // TEST(test_negate);
   // TEST(test_add);
@@ -99,15 +99,52 @@ void test_frac_part(TestObjs *objs) {
 }
 
 void test_create_from_hex(TestObjs *objs) {
+
+  // Format X.Y
   (void) objs;
-
   Fixedpoint val1 = fixedpoint_create_from_hex("f6a5865.00f2");
-
   ASSERT(fixedpoint_is_valid(val1));
-
   ASSERT(0xf6a5865UL == fixedpoint_whole_part(val1));
-
   ASSERT(0x00f2000000000000UL == fixedpoint_frac_part(val1));
+
+
+  // Format -X.Y
+  Fixedpoint val2 = fixedpoint_create_from_hex("-f6a5865.00f2");
+  ASSERT(fixedpoint_is_valid(val2));
+  ASSERT(fixedpoint_is_neg(val2));
+  ASSERT(0xf6a5865UL == fixedpoint_whole_part(val2));
+  ASSERT(0x00f2000000000000UL == fixedpoint_frac_part(val2));
+
+  // Format X
+  Fixedpoint val3 = fixedpoint_create_from_hex("f6a5865");
+  ASSERT(fixedpoint_is_valid(val3));
+  ASSERT(0xf6a5865UL == fixedpoint_whole_part(val3));
+  ASSERT(0x0UL == fixedpoint_frac_part(val3));
+
+  // Format -X
+  Fixedpoint val4 = fixedpoint_create_from_hex("-f6a5865");
+  ASSERT(fixedpoint_is_valid(val4));
+  ASSERT(fixedpoint_is_neg(val4));
+  ASSERT(0xf6a5865UL == fixedpoint_whole_part(val4));
+  ASSERT(0x0UL == fixedpoint_frac_part(val4));
+
+  // mix of upper and lower case
+  Fixedpoint val5 = fixedpoint_create_from_hex("f6A5865.00F2");
+  ASSERT(fixedpoint_is_valid(val5));
+  ASSERT(0xf6a5865UL == fixedpoint_whole_part(val5));
+  ASSERT(0x00f2000000000000UL == fixedpoint_frac_part(val5));
+  
+  // invalid letters in the whole portion
+  Fixedpoint val6 = fixedpoint_create_from_hex("f6Z5865.002");
+  ASSERT(!fixedpoint_is_valid(val6));
+  ASSERT(0x0UL == fixedpoint_whole_part(val6));
+  ASSERT(0x0UL == fixedpoint_frac_part(val6));
+
+  // invalid letters in the frac portion
+  Fixedpoint val7 = fixedpoint_create_from_hex("f6A5865.00Z2");
+  ASSERT(!fixedpoint_is_valid(val7));
+  ASSERT(0x0UL == fixedpoint_whole_part(val7));
+  ASSERT(0x0UL == fixedpoint_frac_part(val7));
 }
 
 void test_format_as_hex(TestObjs *objs) {
