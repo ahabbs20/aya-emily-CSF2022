@@ -81,20 +81,17 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
 
 // emily = validate 
 // It also includes uppercase, will edit later
+// This should be fixed
 bool validateChar(char toValidate) {
-  bool toReturn = true;
+  bool isLowercase = toValidate >= 'a' && toValidate <= 'f';
+  bool isUppercase = toValidate >= 'A' && toValidate <= 'F';
+  bool isNumber = toValidate >= '0' && toValidate <= '9';
 
-  if (toValidate < 'a' || toValidate > 'f') {
-    toReturn = false;
+  if (isLowercase || isUppercase || isNumber) {
+    return true;
   }
 
-  if (toValidate < '0' || toValidate > '9') {
-    toReturn = false;
-  } else {
-    toReturn = true;
-  }
-
-  return toReturn;
+  return false;
 }
 
 
