@@ -302,7 +302,6 @@ void test_halve(TestObjs *objs) {
   // 3 becomes 1.5
   // 1.5 becomes .75
   // lsb = 1 --> underflow
-
 }
 
 void test_sub(TestObjs *objs) {
