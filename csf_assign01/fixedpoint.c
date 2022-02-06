@@ -102,6 +102,45 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
    return val.frac;
 }
 
+/* // basic outline for add/subtract
+  1) check if signs are the same -> send to function that does magnitude addition
+  2) check if signs are NOT the same -> send to function that does magnitude subtraction
+
+  Let a = left, b = right
+  let newWhole=0, newFrac
+
+  // own function (all you need to know is their sign is the same, else it doesnt matter)
+  // if the signs are both positive or both negative, it is magnitude addition
+    // add fractions
+    if (a.frac > a.frac + b.frac) { // carry over has occured
+      newFrac = a.frac + b.frac;
+      newWhole = 1;
+    }
+    // carry over
+
+    // add whole
+    if (a.whole > a.whole + b.whole) {
+      // an overflow has occured, mark as overflows
+    } else {
+      newWhole += a.whole + b. whole
+    }
+    newFixedPoint (send to create_3)
+
+  // this is itsown function
+  if the signs are different, it is  magnitude subtraction
+  let a be positive and b be negative
+  if afrac < bfrac
+    borrow from whole (+0x8000.....000UL)
+    subtract as usual
+  if a.whole < b.whole
+    underflow
+  else 
+    subtract
+    }
+
+*/
+
+
 
 // Emily
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
