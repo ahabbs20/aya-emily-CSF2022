@@ -145,81 +145,61 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 // Emily
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   // TODO: implement
-  uint64_t left_frac = left.frac;
-  uint64_t right_frac = right.frac;
-  uint64_t frac_sum = left_frac + right_frac;
-
-  uint64_t left_whole = left.whole;
-  uint64_t right_whole = right.whole;
-  uint64_t whole_sum = left_whole + right_whole;
-
-  Fixedpoint sum;
   
-  if (left.sign == negative && right.sign == negative) { // Note: The same as positive.
-    bool isOverflow = false;
-    if (frac_sum < right_frac || frac_sum < left_frac) {
-      whole_sum += 1;
-    }
-    if (whole_sum < right_whole || whole_sum < left_whole) {
-      isOverflow = true;
-    }
-
-    if (isOverflow) {
-      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum,  // you can just use the sign of one
-        .sign = negative, .overflow = over, .underflow = notUnder,
-        .validity = valid};
-    } else {
-      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum,
-        .sign = negative, .overflow = notOver, .underflow = notUnder,
-        .validity = valid};
-    }
-    
-  } else if (left.sign == positive && right.sign == positive) {
-    bool isOverflow = false;
-    if (frac_sum < right_frac || frac_sum < left_frac) {
-      whole_sum += 1;
-    } 
-
-    if (whole_sum < right_whole || whole_sum < left_whole) {
-      isOverflow = true;
-    }
-
-    if (isOverflow) {
-      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum,
-        .sign = positive, .overflow = over, .underflow = notUnder,
-	.validity = valid};
-    } else {
-      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum, 
-        .sign = positive, .overflow = notOver, .underflow = notUnder, 
-        .validity = valid};
-    }
+  if ((left.sign == negative && right.sign == negative) || (right.sign == positive && left.sign == positive)) { // Note: The same as positive.
+    return fixedpoint_add_case_same_sign(left, right);
   } else if (left.sign == positive && right.sign == negative) { // here you can just create a function with func(pos, neg) and thus no confusion
-    bool isOverflow = false;	  
-    frac_sum = left_frac - right_frac;
-    whole_sum = left_whole - right_whole;
-    
-    if (whole_sum > 0 && frac_sum < 0) { 
-      whole_sum -= 1;
-      //TODO: figure out how to invert frac_sum 
-    } else if (whole_sum < 0 && frac_sum > 0) {
-      whole_sum *= -1;
-      whole_sum -= 1;
-      //TODO: figure out how to invert frac_sum
-    } else if (whole_sum < 0 && frac_sum < 0) {
-      whole_sum *= -1;
-      frac_sum *= -1;
-    }
+    return fixedpoint_add_case_diff_sign(left, right);
+  } else /*if (left.sign == negative && right.sign == positive)*/{
+    return fixedpoint_add_case_diff_sign(right, left);
+  }
 
+}
 
+Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg) {
+  uint64_t newFrac = pos.frac - neg.frac;
+  uint64_t newWhole = 0;
+  Fixedpoint toReturn;
+  bool isNegative = false;
 
-  } else if (left.sign == negative && right.sign == positive) {
-    bool isOverflow = false;
-    frac_sum = right_frac - left_frac;
-    whole_sum = right_whole - left_whole;
-  } 
+  if (pos.frac < pos.frac - neg.frac) {
+    newWhole = -1;
+  }
+  
+  newWhole = newWhole + (pos.whole - neg.whole);
+  
+  if (newWhole < 0) {
+    isNegative = true;
+    newWhole *= -1;
+  }
 
+  if (pos.whole < pos.whole - neg.whole) {
+    //Overflow
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNegative, true);
+    toReturn.overflow = over;
+  } else {
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNegative, true);
+  }
+  return toReturn;
+}
 
-  return sum;
+Fixedpoint fixedpoint_add_case_same_sign(Fixedpoint left, Fixedpoint right) {
+  uint64_t newFrac = left.frac + right.frac;
+  uint64_t newWhole = left.whole + right.whole;
+  Fixedpoint toReturn;
+  bool isNegative = right.sign == 1;
+
+  if (newFrac < left.frac || newFrac < right.frac) {
+    newWhole += 1;
+  }
+
+  if (newWhole < left.whole || newWhole < right.whole) {
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNegative, 0);
+    toReturn.overflow = over;
+  } else {
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNegative, 0);
+  }
+  return toReturn;
 }
 
 // Emily
