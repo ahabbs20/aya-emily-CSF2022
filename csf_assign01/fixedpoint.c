@@ -278,7 +278,7 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   if (fixedpoint_is_zero(subtracted)) {
     return 0;
   }
-  if (fixedpoint_is_negative(subtracted)) {
+  if (fixedpoint_is_neg(subtracted)) {
     return -1;
   }
   return 1;
