@@ -28,6 +28,8 @@ void test_format_as_hex(TestObjs *objs);
 void test_negate(TestObjs *objs);
 void test_add(TestObjs *objs);
 void test_sub(TestObjs *objs);
+void test_double(TestObjs *objs);
+void test_halve(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
 // TODO: add more test functions
@@ -50,6 +52,8 @@ int main(int argc, char **argv) {
   // TEST(test_sub);
   // TEST(test_is_overflow_pos);
   TEST(test_is_err);
+  TEST(test_double);
+  // TEST(test_halve;
 
   // IMPORTANT: if you add additional test functions (which you should!),
   // make sure they are included here.  E.g., if you add a test function
@@ -230,6 +234,56 @@ void test_add(TestObjs *objs) {
   ASSERT(fixedpoint_is_neg(sum));
   ASSERT(0xc7252a0c31d8eUL == fixedpoint_whole_part(sum));
   ASSERT(0x5be47e8ea0538c50UL == fixedpoint_frac_part(sum));
+}
+
+
+void test_double(TestObjs *objs) {
+  (void) objs;
+  // doubling 1 makes 2
+  Fixedpoint doubled_one = fixedpoint_double(objs->one);
+  ASSERT(2UL == doubled_one.whole);
+  ASSERT(0UL == doubled_one.frac);
+
+  // doubling 0 makes 0
+  Fixedpoint doubled_zero = fixedpoint_double(objs->zero);
+  ASSERT(0UL == doubled_zero.whole);
+  ASSERT(0UL == doubled_zero.frac);
+
+  // doubling .25 makes .5
+  Fixedpoint doubled_one_fourth = fixedpoint_double(objs->one_fourth);
+  ASSERT(0UL == doubled_one_fourth.whole);
+  ASSERT(0x8000000000000000UL == doubled_one_fourth.frac);
+
+  // doubling negatives does not change sign
+  
+  // double carries over into whole
+  // 0 + 2(.5)
+  Fixedpoint doubled_one_half = fixedpoint_double(objs->one_half);
+  ASSERT(1UL == doubled_one_half.whole);
+  ASSERT(0UL == doubled_one_half.frac);
+
+  // doubling with both whole and frac
+  Fixedpoint doubled_real1 = fixedpoint_create2(1UL, 0x4000000000000000UL);
+  ASSERT(2UL == doubled_real1.whole);
+  ASSERT(0x8000000000000000UL == doubled_real1.frac);
+
+  Fixedpoint doubled_real2 = fixedpoint_create2(1UL, 0x4000000000000000UL);
+  ASSERT(2UL == doubled_real2.whole);
+  ASSERT(0x8000000000000000UL == doubled_real2.frac);
+
+  // double with carry over onto non-zero whole
+  Fixedpoint doubled_real3 = fixedpoint_create2(1UL, 0x8000000000000000UL);
+  ASSERT(3UL == doubled_real3.whole);
+  ASSERT(0UL == doubled_real3.frac);
+
+
+  // double cutting off whole
+  // max * 2, note is cut off.
+}
+
+void test_halve(TestObjs *objs) {
+
+
 }
 
 void test_sub(TestObjs *objs) {

@@ -126,16 +126,33 @@ Fixedpoint fixedpoint_negate(Fixedpoint val) {
 
 // Aya
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
-  return DUMMY;
+
+  
+  return val;
 }
 
 // Aya
 Fixedpoint fixedpoint_double(Fixedpoint val) {
+  printf("\nBefore: %u.%u    ", val.whole, val.frac);
+  uint64_t mostSignificantBit = 1 << (val.frac - 1);
+  if (mostSignificantBit != 0) {
+    val.whole++;
+  }
+
+  val.frac = val.frac << 1;
+  
+  mostSignificantBit = 1 << (val.whole - 1);
+  
+  if (1 << (val.whole - 1) != 0) {
+    val.overflow = over;
+    return val;
+  } else {
+    val.whole = val.whole << 1;
+    printf("Now: %u.%u\n", val.whole, val.frac);
+    return val;
+  }
+
   // TODO: implement
-  assert(0);
-  return DUMMY;
 }
 
 // emily
@@ -172,14 +189,14 @@ int fixedpoint_is_neg(Fixedpoint val) {
 // Should this be val.overflow == over?
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
   // TODO: implement
-  return (val.overflow == under) && (val.sign == negative);;
+  return (val.overflow == over) && (val.sign == negative);;
 }
 
 // Emily
 // Should this be val.overflow == over?
 int fixedpoint_is_overflow_pos(Fixedpoint val) {
   // TODO: implement
-  return (val.overflow == under) && (val.sign == positive);
+  return (val.overflow == over) && (val.sign == positive);
 }
 
 // Aya
