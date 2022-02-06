@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
   TEST(test_create_from_hex);
   // TEST(test_format_as_hex);
   TEST(test_negate);
-  // TEST(test_add);
+  TEST(test_add);
   // TEST(test_sub);
   // TEST(test_is_overflow_pos);
   TEST(test_is_err);
@@ -227,6 +227,20 @@ void test_add(TestObjs *objs) {
   (void) objs;
 
   Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create_from_hex("8bd.0e34492025065");
+  rhs = fixedpoint_create_from_hex("5d7b061d6.034f5d");
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(!fixedpoint_is_neg(sum));
+  ASSERT(0x5d7b06a93UL == fixedpoint_whole_part(sum));
+  ASSERT(0x1183a62025065000UL == fixedpoint_frac_part(sum));
+
+  lhs = fixedpoint_create_from_hex("-8a6a9f92d72.82a9b99ad4e76");
+  rhs = fixedpoint_create_from_hex("-8a93a62c25996.e09875");
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum));
+  ASSERT(0x8b1e10cbb8709UL == fixedpoint_whole_part(sum));
+  ASSERT(0x63422e9ad4e76000UL == fixedpoint_frac_part(sum));
 
   lhs = fixedpoint_create_from_hex("-c7252a193ae07.7a51de9ea0538c5");
   rhs = fixedpoint_create_from_hex("d09079.1e6d601");

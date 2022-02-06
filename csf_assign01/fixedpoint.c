@@ -103,11 +103,84 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 }
 
 
-// Emil
+// Emily
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   // TODO: implement
-  assert(0);
-  return DUMMY;
+  uint64_t left_frac = left.frac;
+  uint64_t right_frac = right.frac;
+  uint64_t frac_sum = left_frac + right_frac;
+
+  uint64_t left_whole = left.whole;
+  uint64_t right_whole = right.whole;
+  uint64_t whole_sum = left_whole + right_whole;
+
+  Fixedpoint sum;
+  
+  if (left.sign == negative && right.sign == negative) {
+    bool isOverflow = false;
+    if (frac_sum < right_frac || frac_sum < left_frac) {
+      whole_sum += 1;
+    }
+    if (whole_sum < right_whole || whole_sum < left_whole) {
+      isOverflow = true;
+    }
+
+    if (isOverflow) {
+      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum, 
+        .sign = negative, .overflow = over, .underflow = notUnder,
+        .validity = valid};
+    } else {
+      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum,
+        .sign = negative, .overflow = notOver, .underflow = notUnder,
+        .validity = valid};
+    }
+    
+  } else if (left.sign == positive && right.sign == positive) {
+    bool isOverflow = false;
+    if (frac_sum < right_frac || frac_sum < left_frac) {
+      whole_sum += 1;
+    } 
+
+    if (whole_sum < right_whole || whole_sum < left_whole) {
+      isOverflow = true;
+    }
+
+    if (isOverflow) {
+      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum,
+        .sign = positive, .overflow = over, .underflow = notUnder,
+	.validity = valid};
+    } else {
+      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum, 
+        .sign = positive, .overflow = notOver, .underflow = notUnder, 
+        .validity = valid};
+    }
+  } else if (left.sign == positive && right.sign == negative) {
+    bool isOverflow = false;	  
+    frac_sum = left_frac - right_frac;
+    whole_sum = left_whole - right_whole;
+    
+    if (whole_sum > 0 && frac_sum < 0) {
+      whole_sum -= 1;
+      //TODO: figure out how to invert frac_sum
+    } else if (whole_sum < 0 && frac_sum > 0) {
+      whole_sum *= -1;
+      whole_sum -= 1;
+      //TODO: figure out how to invert frac_sum
+    } else if (whole_sum < 0 && frac_sum < 0) {
+      whole_sum *= -1;
+      frac_sum *= -1;
+    }
+
+
+
+  } else if (left.sign == negative && right.sign == positive) {
+    bool isOverflow = false;
+    frac_sum = right_frac - left_frac;
+    whole_sum = right_whole - left_whole;
+  } 
+
+
+  return sum;
 }
 
 // Emily
