@@ -194,6 +194,7 @@ Fixedpoint fixedpoint_add_case_same_sign(Fixedpoint left, Fixedpoint right) {
   bool isNegative = right.sign == 1;
 
   if (newFrac < left.frac || newFrac < right.frac) {
+    //TODO: fix frac part (overflow) 
     newWhole += 1;
   }
 

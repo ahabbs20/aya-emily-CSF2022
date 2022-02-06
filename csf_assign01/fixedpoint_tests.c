@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   // TEST(test_format_as_hex);
   TEST(test_negate);
   TEST(test_add);
-  // TEST(test_sub);
+  TEST(test_sub);
   // TEST(test_is_overflow_pos);
   TEST(test_is_err);
   TEST(test_double);
@@ -104,10 +104,15 @@ void test_frac_part(TestObjs *objs) {
 
 void test_create_from_hex(TestObjs *objs) {
   // Note, the number is 258627685.242
+  (void) objs;
 
+  //Might've found an error here with representation although i'm not sure
+  Fixedpoint val0 = fixedpoint_create_from_hex("d73533cd5.ffb28a49");
+  ASSERT(fixedpoint_is_valid(val0));
+  ASSERT(0xd73533cd5 == fixedpoint_whole_part(val0));
+  ASSERT(0xffb28a49 == fixedpoint_frac_part(val0));
 
   // Format X.Y
-  (void) objs;
   Fixedpoint val1 = fixedpoint_create_from_hex("f6a5865.00f2");
   ASSERT(fixedpoint_is_valid(val1));
   ASSERT(0xf6a5865UL == fixedpoint_whole_part(val1));
@@ -248,6 +253,20 @@ void test_add(TestObjs *objs) {
   ASSERT(fixedpoint_is_neg(sum));
   ASSERT(0xc7252a0c31d8eUL == fixedpoint_whole_part(sum));
   ASSERT(0x5be47e8ea0538c50UL == fixedpoint_frac_part(sum));
+
+  lhs = fixedpoint_create_from_hex("d73533cd5.ffb28a49");
+  rhs = fixedpoint_create_from_hex("3f7d.5f7f3e");
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(!fixedpoint_is_neg(sum));
+  ASSERT(0xd73537c53UL == fixedpoint_whole_part(sum));
+  ASSERT(0x5f31c849UL == fixedpoint_frac_part(sum));
+
+  lhs = fixedpoint_create_from_hex("c2d77fa53.cf54ab3370");
+  rhs = fixedpoint_create_from_hex("-4140b33626.7e6b14572c73");
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(!fixedpoint_is_neg(sum));
+  ASSERT(0x35133b3bd2UL == fixedpoint_whole_part(sum));
+  ASSERT(0xaf166923bc73UL == fixedpoint_frac_part(sum));
 }
 
 
