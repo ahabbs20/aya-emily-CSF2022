@@ -244,17 +244,26 @@ void test_double(TestObjs *objs) {
   ASSERT(2UL == doubled_one.whole);
   ASSERT(0UL == doubled_one.frac);
 
+  
   // doubling 0 makes 0
   Fixedpoint doubled_zero = fixedpoint_double(objs->zero);
   ASSERT(0UL == doubled_zero.whole);
   ASSERT(0UL == doubled_zero.frac);
 
+  
   // doubling .25 makes .5
   Fixedpoint doubled_one_fourth = fixedpoint_double(objs->one_fourth);
   ASSERT(0UL == doubled_one_fourth.whole);
   ASSERT(0x8000000000000000UL == doubled_one_fourth.frac);
 
   // doubling negatives does not change sign
+  doubled_one = objs->one;
+  doubled_one = fixedpoint_negate(doubled_one);
+  doubled_one = fixedpoint_double(doubled_one);
+  ASSERT(2UL == doubled_one.whole);
+  ASSERT(0UL == doubled_one.frac);
+  ASSERT(fixedpoint_is_neg(doubled_one));
+
   
   // double carries over into whole
   // 0 + 2(.5)
@@ -262,6 +271,7 @@ void test_double(TestObjs *objs) {
   ASSERT(1UL == doubled_one_half.whole);
   ASSERT(0UL == doubled_one_half.frac);
 
+  /*
   // doubling with both whole and frac
   Fixedpoint doubled_real1 = fixedpoint_create2(1UL, 0x4000000000000000UL);
   ASSERT(2UL == doubled_real1.whole);
@@ -279,6 +289,7 @@ void test_double(TestObjs *objs) {
 
   // double cutting off whole
   // max * 2, note is cut off.
+  */
 }
 
 void test_halve(TestObjs *objs) {

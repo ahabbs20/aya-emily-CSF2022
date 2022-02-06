@@ -133,22 +133,25 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
 
 // Aya
 Fixedpoint fixedpoint_double(Fixedpoint val) {
-  printf("\nBefore: %u.%u    ", val.whole, val.frac);
-  uint64_t mostSignificantBit = 1 << (val.frac - 1);
-  if (mostSignificantBit != 0) {
+  // location of msb
+  uint64_t mask = 1UL << 63;
+
+  printf("\nBefore: %lu.%lu    ", val.whole, val.frac);
+  //uint64_t mostSignificantBit = 1 << val.frac;
+  if ((mask & val.frac) == mask) {
     val.whole++;
   }
 
   val.frac = val.frac << 1;
   
-  mostSignificantBit = 1 << (val.whole - 1);
-  
-  if (1 << (val.whole - 1) != 0) {
+  //mostSignificantBit = 1 << val.whole;
+
+  if ((mask & val.whole) == mask) {
     val.overflow = over;
     return val;
   } else {
     val.whole = val.whole << 1;
-    printf("Now: %u.%u\n", val.whole, val.frac);
+    printf("Now: %lu.%lu\n", val.whole, val.frac);
     return val;
   }
 
