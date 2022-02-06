@@ -109,8 +109,8 @@ void test_create_from_hex(TestObjs *objs) {
   //Might've found an error here with representation although i'm not sure
   Fixedpoint val0 = fixedpoint_create_from_hex("d73533cd5.ffb28a49");
   ASSERT(fixedpoint_is_valid(val0));
-  ASSERT(0xd73533cd5 == fixedpoint_whole_part(val0));
-  ASSERT(0xffb28a49 == fixedpoint_frac_part(val0));
+  ASSERT(0xd73533cd5UL == fixedpoint_whole_part(val0));
+  ASSERT(0xffb28a49UL == fixedpoint_frac_part(val0));
 
   // Format X.Y
   Fixedpoint val1 = fixedpoint_create_from_hex("f6a5865.00f2");
