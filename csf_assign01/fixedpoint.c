@@ -155,7 +155,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
 
   Fixedpoint sum;
   
-  if (left.sign == negative && right.sign == negative) {
+  if (left.sign == negative && right.sign == negative) { // Note: The same as positive.
     bool isOverflow = false;
     if (frac_sum < right_frac || frac_sum < left_frac) {
       whole_sum += 1;
@@ -165,7 +165,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     }
 
     if (isOverflow) {
-      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum, 
+      sum = (Fixedpoint) { .whole = whole_sum, .frac = frac_sum,  // you can just use the sign of one
         .sign = negative, .overflow = over, .underflow = notUnder,
         .validity = valid};
     } else {
@@ -193,14 +193,14 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
         .sign = positive, .overflow = notOver, .underflow = notUnder, 
         .validity = valid};
     }
-  } else if (left.sign == positive && right.sign == negative) {
+  } else if (left.sign == positive && right.sign == negative) { // here you can just create a function with func(pos, neg) and thus no confusion
     bool isOverflow = false;	  
     frac_sum = left_frac - right_frac;
     whole_sum = left_whole - right_whole;
     
-    if (whole_sum > 0 && frac_sum < 0) {
+    if (whole_sum > 0 && frac_sum < 0) { 
       whole_sum -= 1;
-      //TODO: figure out how to invert frac_sum
+      //TODO: figure out how to invert frac_sum 
     } else if (whole_sum < 0 && frac_sum > 0) {
       whole_sum *= -1;
       whole_sum -= 1;
