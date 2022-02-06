@@ -146,11 +146,11 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   // TODO: implement
   
-  if ((left.sign == negative && right.sign == negative) || (right.sign == positive && left.sign == positive)) { // Note: The same as positive.
+  if ((left.sign == negative && right.sign == negative) || (right.sign == positive && left.sign == positive)) {
     return fixedpoint_add_case_same_sign(left, right);
-  } else if (left.sign == positive && right.sign == negative) { // here you can just create a function with func(pos, neg) and thus no confusion
+  } else if (left.sign == positive && right.sign == negative) {
     return fixedpoint_add_case_diff_sign(left, right);
-  } else /*if (left.sign == negative && right.sign == positive)*/{
+  } else {
     return fixedpoint_add_case_diff_sign(right, left);
   }
 
@@ -159,26 +159,30 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
 Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg) {
   uint64_t newFrac = pos.frac - neg.frac;
   uint64_t newWhole = 0;
+  uint64_t carry = 0;
   Fixedpoint toReturn;
-  bool isNegative = false;
+  bool isNeg = false;
 
-  if (pos.frac < pos.frac - neg.frac) {
-    newWhole = -1;
+  if (pos.frac < neg.frac) {
+    //Will become negative, magnitude of newWhole is switched 
+    newFrac = neg.frac - pos.frac;
+    carry = 1;
+    //TODO: invert newFrac
   }
   
-  newWhole = newWhole + (pos.whole - neg.whole);
-  
-  if (newWhole < 0) {
-    isNegative = true;
-    newWhole *= -1;
+  if (pos.whole < neg.whole) {
+    newWhole = neg.whole - pos.whole;
+    isNeg = true;
+  } else {
+    newWhole = pos.whole - neg.whole;
   }
 
-  if (pos.whole < pos.whole - neg.whole) {
+  if (newWhole > pos.whole) {
     //Overflow
-    toReturn = fixedpoint_create_3(newWhole, newFrac, isNegative, true);
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNeg, 0);
     toReturn.overflow = over;
   } else {
-    toReturn = fixedpoint_create_3(newWhole, newFrac, isNegative, true);
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNeg, 0);
   }
   return toReturn;
 }
