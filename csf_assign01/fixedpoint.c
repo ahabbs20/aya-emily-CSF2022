@@ -208,14 +208,12 @@ Fixedpoint fixedpoint_add_case_same_sign(Fixedpoint left, Fixedpoint right) {
 
 // Emily
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
-  // TODO: implement
-  assert(0);
-  return DUMMY;
+  Fixedpoint negatedRight = fixedpoint_negate(right);
+  return fixedpoint_add(left, negatedRight);
 }
 
 // aya
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
-  // TODO: implement
   val.sign = negative;
   return val;
 }
@@ -276,9 +274,14 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
 
 // emily
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
-  // TODO: implement
-  assert(0);
-  return 0;
+  Fixedpoint subtracted = fixedpoint_sub(left, right);
+  if (fixedpoint_is_zero(subtracted)) {
+    return 0;
+  }
+  if (fixedpoint_is_negative(subtracted)) {
+    return -1;
+  }
+  return 1;
 }
 
 
