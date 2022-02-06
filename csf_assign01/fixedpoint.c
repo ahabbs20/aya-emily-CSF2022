@@ -126,22 +126,41 @@ Fixedpoint fixedpoint_negate(Fixedpoint val) {
 
 // Aya
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
+  // location of msb
+  uint64_t mask = 1UL;
+  uint64_t underflowing = 0;
 
+  //printf("\nBefore: %lu.%lu    ", val.whole, val.frac);
+  //uint64_t mostSignificantBit = 1 << val.frac;
+  if ((mask & val.whole) == mask) {
+    underflowing = 0x8000000000000000UL;
+  }
+  val.whole = val.whole >> 1;
   
-  return val;
+  //mostSignificantBit = 1 << val.whole;
+
+  if ((mask & val.frac) == mask) {
+    val.underflow = under;
+    return val;
+  } else {
+    val.frac = val.frac >> 1;
+    val.frac += underflowing;
+    //printf("Now: %lu.%lu\n", val.whole, val.frac);
+    return val;
+  }
 }
 
 // Aya
 Fixedpoint fixedpoint_double(Fixedpoint val) {
   // location of msb
   uint64_t mask = 1UL << 63;
+  uint64_t overflowing = 0;
 
-  printf("\nBefore: %lu.%lu    ", val.whole, val.frac);
+  //printf("\nBefore: %lu.%lu    ", val.whole, val.frac);
   //uint64_t mostSignificantBit = 1 << val.frac;
   if ((mask & val.frac) == mask) {
-    val.whole++;
+    overflowing++;
   }
-
   val.frac = val.frac << 1;
   
   //mostSignificantBit = 1 << val.whole;
@@ -151,7 +170,8 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
     return val;
   } else {
     val.whole = val.whole << 1;
-    printf("Now: %lu.%lu\n", val.whole, val.frac);
+    val.whole += overflowing;
+    //printf("Now: %lu.%lu\n", val.whole, val.frac);
     return val;
   }
 

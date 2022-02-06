@@ -239,6 +239,7 @@ void test_add(TestObjs *objs) {
 
 void test_double(TestObjs *objs) {
   (void) objs;
+  /*
   // doubling 1 makes 2
   Fixedpoint doubled_one = fixedpoint_double(objs->one);
   ASSERT(2UL == doubled_one.whole);
@@ -263,37 +264,44 @@ void test_double(TestObjs *objs) {
   ASSERT(2UL == doubled_one.whole);
   ASSERT(0UL == doubled_one.frac);
   ASSERT(fixedpoint_is_neg(doubled_one));
-
+  
   
   // double carries over into whole
   // 0 + 2(.5)
   Fixedpoint doubled_one_half = fixedpoint_double(objs->one_half);
   ASSERT(1UL == doubled_one_half.whole);
   ASSERT(0UL == doubled_one_half.frac);
-
-  /*
+  */
+  
   // doubling with both whole and frac
   Fixedpoint doubled_real1 = fixedpoint_create2(1UL, 0x4000000000000000UL);
+  doubled_real1 = fixedpoint_double(doubled_real1);
   ASSERT(2UL == doubled_real1.whole);
   ASSERT(0x8000000000000000UL == doubled_real1.frac);
 
   Fixedpoint doubled_real2 = fixedpoint_create2(1UL, 0x4000000000000000UL);
+  doubled_real2 = fixedpoint_double(doubled_real2);
   ASSERT(2UL == doubled_real2.whole);
   ASSERT(0x8000000000000000UL == doubled_real2.frac);
 
   // double with carry over onto non-zero whole
   Fixedpoint doubled_real3 = fixedpoint_create2(1UL, 0x8000000000000000UL);
+  doubled_real3 = fixedpoint_double(doubled_real3);
   ASSERT(3UL == doubled_real3.whole);
   ASSERT(0UL == doubled_real3.frac);
 
-
   // double cutting off whole
+  Fixedpoint doubled_real4 = fixedpoint_create2(0x8000000000000000UL, 0);
+  doubled_real4 = fixedpoint_double(doubled_real4);
+  ASSERT(doubled_real4.overflow == over);
   // max * 2, note is cut off.
-  */
+  
 }
 
 void test_halve(TestObjs *objs) {
-
+  // 2 becomes 1
+  // 0 becomes 0
+  //
 
 }
 
