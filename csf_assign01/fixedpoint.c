@@ -142,15 +142,21 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 // Emily
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   // TODO: implement
-  
-  if ((left.sign == negative && right.sign == negative) || (right.sign == positive && left.sign == positive)) {
-    return fixedpoint_add_case_same_sign(left, right);
-  } else if (left.sign == positive && right.sign == negative) {
-    return fixedpoint_add_case_diff_sign(left, right, true);
-  } else {
-    return fixedpoint_add_case_diff_sign(right, left, false);
-  }
+  Fixedpoint holder;
 
+  if ((fixedpoint_is_neg(left) && fixedpoint_is_neg(right)) || (right.sign == positive && left.sign == positive)) {
+    holder = fixedpoint_add_case_same_sign(left, right);
+  } else if (left.sign == positive && fixedpoint_is_neg(right)) {
+    holder = fixedpoint_add_case_diff_sign(left, right, true);
+  } else {
+    if (right.whole > left.whole) {
+      holder = fixedpoint_add_case_diff_sign(right, left, true);
+    } else {
+      holder = fixedpoint_add_case_diff_sign(right, left, false);
+    }
+    //holder = fixedpoint_add_case_diff_sign(right, left, false);
+  }
+  return holder;
 }
 
 Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg, int swapped) 
@@ -179,7 +185,6 @@ Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg, int swa
   }
 
 if (newWhole > pos.whole) {
-//Overflow
     toReturn = fixedpoint_create_3(newWhole, newFrac, isNeg, 0);
     toReturn.overflow = over;
   } else {
@@ -215,10 +220,16 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
 
   if (left.sign == negatedRight.sign) {
     return fixedpoint_add_case_same_sign(left, negatedRight);
-  } else if (left.sign == positive && negatedRight.sign == negative) {
+  } else if (left.sign == positive && fixedpoint_is_neg(negatedRight)) {
+    if (left.whole < right.whole) {
+      return fixedpoint_add_case_diff_sign(left, negatedRight, true);
+    }
     return fixedpoint_add_case_diff_sign(left, negatedRight, false);
   } else {
-    return fixedpoint_add_case_diff_sign(negatedRight, left, true);
+    if (left.whole > right.whole) {
+      return fixedpoint_add_case_diff_sign(negatedRight, left, true);
+    }
+    return fixedpoint_add_case_diff_sign(negatedRight, left, false);
   }
 }
 
@@ -323,7 +334,7 @@ int fixedpoint_is_neg(Fixedpoint val) {
 // Should this be val.overflow == over?
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
   // TODO: implement
-  return (val.overflow == over) && (val.sign == negative);;
+  return (val.overflow == over) && (val.sign == negative);
 }
 
 // Emily
