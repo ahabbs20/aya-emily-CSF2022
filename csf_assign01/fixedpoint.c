@@ -146,14 +146,15 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   if ((left.sign == negative && right.sign == negative) || (right.sign == positive && left.sign == positive)) {
     return fixedpoint_add_case_same_sign(left, right);
   } else if (left.sign == positive && right.sign == negative) {
-    return fixedpoint_add_case_diff_sign(left, right);
+    return fixedpoint_add_case_diff_sign(left, right, true);
   } else {
-    return fixedpoint_add_case_diff_sign(right, left);
+    return fixedpoint_add_case_diff_sign(right, left, false);
   }
 
 }
 
-Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg) {
+Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg, int swapped) 
+{
   uint64_t newFrac = pos.frac - neg.frac;
   uint64_t newWhole = 0;
   uint64_t carry = 0;
@@ -163,19 +164,22 @@ Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg) {
   if (pos.frac < neg.frac) {
     //Will become negative, magnitude of newWhole is switched 
     newFrac = neg.frac - pos.frac;
-    carry = 1;
-    //TODO: invert newFrac
   }
   
-  if (pos.whole < neg.whole) {
-    newWhole = neg.whole - pos.whole;
-    isNeg = true;
-  } else {
-    newWhole = pos.whole - neg.whole;
+  if (swapped == 1) {
+    newFrac = 0x0000000000000000 - newFrac;
+    carry = 1;
   }
 
-  if (newWhole > pos.whole) {
-    //Overflow
+  if (pos.whole < neg.whole) {
+    newWhole = neg.whole - pos.whole - carry;
+    isNeg = true;
+  } else {
+    newWhole = pos.whole - neg.whole - carry;
+  }
+
+if (newWhole > pos.whole) {
+//Overflow
     toReturn = fixedpoint_create_3(newWhole, newFrac, isNeg, 0);
     toReturn.overflow = over;
   } else {
@@ -184,14 +188,14 @@ Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg) {
   return toReturn;
 }
 
-Fixedpoint fixedpoint_add_case_same_sign(Fixedpoint left, Fixedpoint right) {
+Fixedpoint fixedpoint_add_case_same_sign(Fixedpoint left, Fixedpoint right) 
+{
   uint64_t newFrac = left.frac + right.frac;
   uint64_t newWhole = left.whole + right.whole;
   Fixedpoint toReturn;
   bool isNegative = right.sign == 1;
 
-  if (newFrac < left.frac || newFrac < right.frac) {
-    //TODO: fix frac part (overflow) 
+  if (newFrac < left.frac && newFrac < right.frac) { 
     newWhole += 1;
   }
 
