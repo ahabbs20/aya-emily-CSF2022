@@ -92,7 +92,6 @@ bool validateChar(char toValidate) {
   return false;
 }
 
-
 // aya = update
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
   return val.whole;
@@ -139,8 +138,6 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
     }
 
 */
-
-
 
 // Emily
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
@@ -215,8 +212,15 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
 
 // aya
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
-  val.sign = negative;
-  return val;
+  if (fixedpoint_is_zero(val)) {
+    return val;
+  } else if (val.sign == positive) {
+    val.sign = negative;
+    return val;
+  } else {
+    val.sign = positive;
+    return val;
+  }
 }
 
 // Aya
@@ -251,26 +255,21 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
   uint64_t mask = 1UL << 63;
   uint64_t overflowing = 0;
 
-  //printf("\nBefore: %lu.%lu    ", val.whole, val.frac);
   //uint64_t mostSignificantBit = 1 << val.frac;
   if ((mask & val.frac) == mask) {
     overflowing++;
   }
   val.frac = val.frac << 1;
-  
-  //mostSignificantBit = 1 << val.whole;
 
   if ((mask & val.whole) == mask) {
     val.overflow = over;
+    val.validity = invalid;
     return val;
   } else {
     val.whole = val.whole << 1;
     val.whole += overflowing;
-    //printf("Now: %lu.%lu\n", val.whole, val.frac);
     return val;
   }
-
-  // TODO: implement
 }
 
 // emily
@@ -337,8 +336,6 @@ int fixedpoint_is_underflow_pos(Fixedpoint val) {
 // Aya
 int fixedpoint_is_valid(Fixedpoint val) {
   // TODO: implement
-  
-
   return val.validity == valid;
 }
 

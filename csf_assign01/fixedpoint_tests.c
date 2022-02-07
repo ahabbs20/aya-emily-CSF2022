@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
 
   TEST_INIT();
 
-  //TEST(test_whole_part);
-  //TEST(test_frac_part);
+  TEST(test_whole_part);
+  TEST(test_frac_part);
   TEST(test_create_from_hex);
   // TEST(test_format_as_hex);
   TEST(test_negate);
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   // TEST(test_is_overflow_pos);
   TEST(test_is_err);
   TEST(test_double);
-  // TEST(test_halve;
+  // TEST(test_halve);
 
   // IMPORTANT: if you add additional test functions (which you should!),
   // make sure they are included here.  E.g., if you add a test function
@@ -322,6 +322,7 @@ void test_double(TestObjs *objs) {
   Fixedpoint doubled_real4 = fixedpoint_create2(0x8000000000000000UL, 0);
   doubled_real4 = fixedpoint_double(doubled_real4);
   ASSERT(doubled_real4.overflow == over);
+  ASSERT(doubled_real4.validity == invalid);
   // max * 2, note is cut off.
 }
 
