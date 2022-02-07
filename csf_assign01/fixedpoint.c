@@ -343,14 +343,33 @@ int fixedpoint_is_valid(Fixedpoint val) {
   return val.validity == valid;
 }
 
-
-
 // Pair code together
 char *fixedpoint_format_as_hex(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
-  char *s = malloc(20);
-  strcpy(s, "<invalid>");
+  char *s = (char*) calloc(100, sizeof(char));
+  if (val.sign == negative) {
+    strcat(s, "-");
+    printf("\nin val, now %s\n", s);
+  }
+
+  char final[20] = "";
+
+  //char *final = (char*) malloc(20 * sizeof(char));
+  sprintf(final, "%lx", val.whole);
+  strcat(s, final);
+
+  if (val.frac != 0UL) {
+    strcat(s, ".");
+    sprintf(final, "%-.016lx", val.frac);
+
+    for (int i = 15; i > 0; i--) {
+      if (final[i] != '0') {
+        break;
+      } else {
+        final[i] = '\0';
+      }
+    }
+    strcat(s, final);
+  }
   return s;
 }
 
