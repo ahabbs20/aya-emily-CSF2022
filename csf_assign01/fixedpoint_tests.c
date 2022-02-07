@@ -216,8 +216,9 @@ void test_create_from_hex(TestObjs *objs) {
 }
 
 void test_format_as_hex(TestObjs *objs) {
+  
   char *s;
-
+  
   s = fixedpoint_format_as_hex(objs->zero);
   ASSERT(0 == strcmp(s, "0"));
   free(s);
@@ -240,6 +241,11 @@ void test_format_as_hex(TestObjs *objs) {
 
   s = fixedpoint_format_as_hex(objs->large2);
   ASSERT(0 == strcmp(s, "fcbf3d5.00004d1a23c24faf"));
+  free(s);
+  
+  // formatting negative numbers
+  s = fixedpoint_format_as_hex(fixedpoint_create_from_hex("-1.8"));
+  ASSERT(0 == strcmp(s, "-1.8"));
   free(s);
 }
 

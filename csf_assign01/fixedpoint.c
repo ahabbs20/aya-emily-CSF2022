@@ -343,20 +343,20 @@ int fixedpoint_is_valid(Fixedpoint val) {
 
 // Pair code together
 char *fixedpoint_format_as_hex(Fixedpoint val) {
-  char *s = (char*) malloc(100 * sizeof(char));
+  char *s = (char*) calloc(100, sizeof(char));
   if (val.sign == negative) {
     strcat(s, "-");
+    printf("\nin val, now %s\n", s);
   }
 
-  sprintf(s, "%lx", val.whole);
+  char final[20] = "";
+
+  //char *final = (char*) malloc(20 * sizeof(char));
+  sprintf(final, "%lx", val.whole);
+  strcat(s, final);
+
   if (val.frac != 0UL) {
     strcat(s, ".");
-
-    char *final = (char*) malloc(20 * sizeof(char));
-    if (final == NULL) {
-      printf("Final is null?");
-      return "";
-    }
 
     sprintf(final, "%-.016lx", val.frac);
 
@@ -369,7 +369,6 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
     }
 
     strcat(s, final);
-    free(final);
   }
   return s;
 
