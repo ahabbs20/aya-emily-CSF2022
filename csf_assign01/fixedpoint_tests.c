@@ -32,6 +32,7 @@ void test_double(TestObjs *objs);
 void test_halve(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
+void test_compare(TestObjs *objs);
 // TODO: add more test functions
 
 int main(int argc, char **argv) {
@@ -43,16 +44,18 @@ int main(int argc, char **argv) {
 
   TEST_INIT();
 
-  TEST(test_whole_part);
-  TEST(test_frac_part);
-  TEST(test_create_from_hex);
+  TEST(test_compare);
+
+  //TEST(test_whole_part);
+  //TEST(test_frac_part);
+  //TEST(test_create_from_hex);
   // TEST(test_format_as_hex);
-  TEST(test_negate);
-  TEST(test_add);
-  TEST(test_sub);
+  //TEST(test_negate);
+  //TEST(test_add);
+  //TEST(test_sub);
   // TEST(test_is_overflow_pos);
-  TEST(test_is_err);
-  TEST(test_double);
+  //TEST(test_is_err);
+  //TEST(test_double);
   // TEST(test_halve);
 
   // IMPORTANT: if you add additional test functions (which you should!),
@@ -82,6 +85,60 @@ TestObjs *setup(void) {
 
 void cleanup(TestObjs *objs) {
   free(objs);
+}
+
+void test_compare(TestObjs *objs) {
+  // Let a.b, c.d
+
+  // a.b == c.d
+  Fixedpoint equal1 = fixedpoint_create2(1UL, 0x8000000000000000UL); //1.5
+  Fixedpoint equal2 = fixedpoint_create2(1UL, 0x8000000000000000UL); // 1.5
+  ASSERT(0 == fixedpoint_compare(equal1, equal2));
+
+  // a < c, b == d
+  Fixedpoint compare1 = fixedpoint_create2(1UL, 0x8000000000000000UL); //1.5
+  Fixedpoint compare2 = fixedpoint_create2(2UL, 0x8000000000000000UL); // 1.5
+  ASSERT(-1  == fixedpoint_compare(compare1, compare2));
+
+  // a < c, b != d
+  Fixedpoint compare3 = fixedpoint_create2(1UL, 0x8000000000000000UL); //1.5
+  Fixedpoint compare4 = fixedpoint_create2(2UL, 0x4000000000000000UL); // 1.5
+  ASSERT(-1  == fixedpoint_compare(compare3, compare4));
+
+  // a > c, b == d
+  Fixedpoint compare5 = fixedpoint_create2(2UL, 0x8000000000000000UL); //1.5
+  Fixedpoint compare6 = fixedpoint_create2(1UL, 0x8000000000000000UL); // 1.5
+  ASSERT(1  == fixedpoint_compare(compare5, compare6));
+
+  // a > c, b != d
+  Fixedpoint compare7 = fixedpoint_create2(2UL, 0x8000000000000000UL); //1.5
+  Fixedpoint compare8 = fixedpoint_create2(1UL, 0x4000000000000000UL); // 1.5
+  ASSERT(1  == fixedpoint_compare(compare7, compare8));
+
+  // a==c, b > d
+  Fixedpoint compare9 = fixedpoint_create2(1UL, 0x8000000000000000UL); //1.5
+  Fixedpoint compare10 = fixedpoint_create2(1UL, 0x4000000000000000UL); // 1.5
+  ASSERT(1  == fixedpoint_compare(compare9, compare10));
+
+  // a==c, b < d
+  Fixedpoint compare11 = fixedpoint_create2(1UL, 0x4000000000000000UL); //1.5
+  Fixedpoint compare12 = fixedpoint_create2(1UL, 0x8000000000000000UL); // 1.5
+  ASSERT(-1  == fixedpoint_compare(compare11, compare12));
+
+  // -a.b < +c.d
+  Fixedpoint compare13 = fixedpoint_create_from_hex("-1.8");
+  Fixedpoint compare14 = fixedpoint_create_from_hex("1.8");
+  ASSERT(-1  == fixedpoint_compare(compare13, compare14));
+
+  // a.b > -c.d
+  Fixedpoint compare15 = fixedpoint_create_from_hex("1.8");
+  Fixedpoint compare16 = fixedpoint_create_from_hex("-1.8");
+  ASSERT(1  == fixedpoint_compare(compare15, compare16));
+
+  // -a.b == -c.d
+  Fixedpoint compare17 = fixedpoint_create_from_hex("1.8");
+  Fixedpoint compare18 = fixedpoint_create_from_hex("-1.8");
+  ASSERT(1  == fixedpoint_compare(compare17, compare18));
 }
 
 void test_whole_part(TestObjs *objs) {
