@@ -211,7 +211,15 @@ Fixedpoint fixedpoint_add_case_same_sign(Fixedpoint left, Fixedpoint right)
 // Emily
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   Fixedpoint negatedRight = fixedpoint_negate(right);
-  return fixedpoint_add(left, negatedRight);
+  Fixedpoint diff;
+
+  if (left.sign == negatedRight.sign) {
+    return fixedpoint_add_case_same_sign(left, negatedRight);
+  } else if (left.sign == positive && negatedRight.sign == negative) {
+    return fixedpoint_add_case_diff_sign(left, negatedRight, false);
+  } else {
+    return fixedpoint_add_case_diff_sign(negatedRight, left, true);
+  }
 }
 
 // aya

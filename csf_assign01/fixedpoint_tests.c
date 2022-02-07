@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
   //TEST(test_create_from_hex);
    TEST(test_format_as_hex);
   //TEST(test_negate);
-  //TEST(test_add);
-  //TEST(test_sub);
+  TEST(test_add);
+  TEST(test_sub);
   // TEST(test_is_overflow_pos);
   //TEST(test_is_err);
   //TEST(test_double);
@@ -439,7 +439,7 @@ void test_sub(TestObjs *objs) {
   diff = fixedpoint_sub(lhs, rhs);
   ASSERT(!fixedpoint_is_neg(diff));
   //should end in e not f
-  //ASSERT(0x2f397b1adecea9fUL == fixedpoint_whole_part(diff));
+  ASSERT(0x2f397b1adecea9fUL == fixedpoint_whole_part(diff));
   //Probably improperly inverting here
   ASSERT(0x7a061bc752769000UL == fixedpoint_frac_part(diff));
   
