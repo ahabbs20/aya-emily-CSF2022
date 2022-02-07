@@ -110,7 +110,7 @@ void test_create_from_hex(TestObjs *objs) {
   Fixedpoint val0 = fixedpoint_create_from_hex("d73533cd5.ffb28a49");
   ASSERT(fixedpoint_is_valid(val0));
   ASSERT(0xd73533cd5UL == fixedpoint_whole_part(val0));
-  ASSERT(0xffb28a49UL == fixedpoint_frac_part(val0));
+  ASSERT(0xffb28a4900000000UL == fixedpoint_frac_part(val0));
 
   // Format X.Y
   Fixedpoint val1 = fixedpoint_create_from_hex("f6a5865.00f2");
@@ -259,12 +259,12 @@ void test_add(TestObjs *objs) {
   sum = fixedpoint_add(lhs, rhs);
   ASSERT(!fixedpoint_is_neg(sum));
   ASSERT(0xd73537c53UL == fixedpoint_whole_part(sum));
-  ASSERT(0x5f31c849UL == fixedpoint_frac_part(sum));
+  ASSERT(0x5f31c84900000000UL == fixedpoint_frac_part(sum));
 
   lhs = fixedpoint_create_from_hex("c2d77fa53.cf54ab3370");
   rhs = fixedpoint_create_from_hex("-4140b33626.7e6b14572c73");
   sum = fixedpoint_add(lhs, rhs);
-  ASSERT(!fixedpoint_is_neg(sum));
+  ASSERT(fixedpoint_is_neg(sum));
   ASSERT(0x35133b3bd2UL == fixedpoint_whole_part(sum));
   ASSERT(0xaf166923bc73UL == fixedpoint_frac_part(sum));
 }
