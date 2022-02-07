@@ -359,6 +359,7 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
 
   if (val.frac != 0UL) {
     strcat(s, ".");
+
     sprintf(final, "%-.016lx", val.frac);
 
     for (int i = 15; i > 0; i--) {
@@ -366,10 +367,12 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
         break;
       } else {
         final[i] = '\0';
-      }
+      } 
     }
+
     strcat(s, final);
   }
   return s;
+
 }
 
