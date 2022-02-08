@@ -537,6 +537,7 @@ void test_sub(TestObjs *objs) {
   lhs = fixedpoint_create_from_hex("8000000000000000");
   rhs = fixedpoint_create_from_hex("-8000000000000000");
   difference = fixedpoint_sub(lhs, rhs);
+  ASSERT(fixedpoint_is_overflow_pos(difference));
 
   lhs = fixedpoint_create_from_hex("3af7b9110.3ebd3659");
   rhs = fixedpoint_create_from_hex("-75bc9.ff0cd2e23");
