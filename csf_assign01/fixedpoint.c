@@ -104,8 +104,7 @@ Fixedpoint magnitude_addition(Fixedpoint left, Fixedpoint right) {
   } else {
     return fixedpoint_create_3(wholeSum, fracSum, left.sign, valid);
   }
-  //
-  return DUMMY;
+
 }
 
 int compare_magnitudes(Fixedpoint left, Fixedpoint right) {
