@@ -83,6 +83,7 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
    return val.frac;
 }
 
+
 Fixedpoint magnitude_addition(Fixedpoint left, Fixedpoint right) {
   uint64_t fracSum = left.frac + right.frac;
   uint64_t wholeSum = left.whole + right.whole;
@@ -96,7 +97,6 @@ Fixedpoint magnitude_addition(Fixedpoint left, Fixedpoint right) {
     wholeSum++;
   }
 
-  //wholeSum += left.whole + right.whole;
   if (wholeSum < left.whole) { // overflow with addition
     Fixedpoint newFP =  fixedpoint_create_3(wholeSum, fracSum, left.sign, invalid);
     newFP.overflow = over; 
