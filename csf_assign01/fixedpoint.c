@@ -83,27 +83,42 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
    return val.frac;
 }
 
+/*
+  carry has allowed it to go all the way back to one of the numbers
+
+  took a very large number
+  overflowed it just enough to be 1 less than smaller
+  + 1 makes it smaller
+
+  apply to carry and apply to one of the sides
+  and then check for overflow check
+*/
 
 Fixedpoint magnitude_addition(Fixedpoint left, Fixedpoint right) {
   uint64_t fracSum = left.frac + right.frac;
-  uint64_t wholeSum = left.whole + right.whole;
 
-  if (fracSum < left.frac) {
-    if (wholeSum + 1 < wholeSum) { // overflow when we carry
-      Fixedpoint newFP =  fixedpoint_create_3(wholeSum, fracSum, left.sign, invalid);
-      newFP.overflow = over; 
-      return newFP;
-    }
-    wholeSum++;
-  }
+  uint64_t leftWhole = left.whole;
+  uint64_t rightWhole = right.whole;
+
+  uint64_t wholeSum = left.whole + right.whole;
 
   if (wholeSum < left.whole) { // overflow with addition
     Fixedpoint newFP =  fixedpoint_create_3(wholeSum, fracSum, left.sign, invalid);
     newFP.overflow = over; 
     return newFP;
-  } else {
-    return fixedpoint_create_3(wholeSum, fracSum, left.sign, valid);
   }
+  
+  if (fracSum < left.frac) {
+    if (wholeSum + 1 < wholeSum) { // overflow with addition
+      Fixedpoint newFP =  fixedpoint_create_3(wholeSum, fracSum, left.sign, invalid);
+      newFP.overflow = over; 
+      return newFP;
+    }
+
+    wholeSum++;
+  }
+
+  return fixedpoint_create_3(wholeSum, fracSum, left.sign, valid);
 
 }
 
@@ -249,6 +264,8 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   } else if (left.sign == positive && right.sign == negative) {
     return 1;
   }
+
+  // consider case where both are negative
 
   if (left.whole > right.whole) {
     return 1;
