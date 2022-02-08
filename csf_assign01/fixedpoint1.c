@@ -26,6 +26,7 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
   return newFixedPoint;
 }
 
+
 Fixedpoint fixedpoint_create_3(uint64_t whole, uint64_t frac, bool isNegative, int isValid) {
   int sign = isNegative;
 
@@ -34,6 +35,7 @@ Fixedpoint fixedpoint_create_3(uint64_t whole, uint64_t frac, bool isNegative, i
 					    .underflow = notUnder, .validity = isValid};
 
 }
+
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   bool isNegative = false;
@@ -75,6 +77,22 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
 
 }
 
+// emily = validate 
+// It also includes uppercase, will edit later
+// This should be fixed
+bool validateChar(char toValidate) {
+  bool isLowercase = toValidate >= 'a' && toValidate <= 'f';
+  bool isUppercase = toValidate >= 'A' && toValidate <= 'F';
+  bool isNumber = toValidate >= '0' && toValidate <= '9';
+
+  if (isLowercase || isUppercase || isNumber) {
+    return true;
+  }
+
+  return false;
+}
+
+// aya = update
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
   return val.whole;
 }
@@ -83,111 +101,130 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
    return val.frac;
 }
 
-Fixedpoint magnitude_addition(Fixedpoint left, Fixedpoint right) {
-  uint64_t fracSum = left.frac + right.frac;
-  uint64_t wholeSum = left.whole + right.whole;
+/* // basic outline for add/subtract
+  1) check if signs are the same -> send to function that does magnitude addition
+  2) check if signs are NOT the same -> send to function that does magnitude subtraction
 
-  if (fracSum < left.frac) {
-    if (wholeSum + 1 < wholeSum) { // overflow when we carry
-      Fixedpoint newFP =  fixedpoint_create_3(wholeSum, fracSum, left.sign, invalid);
-      newFP.overflow = over; 
-      return newFP;
+  Let a = left, b = right
+  let newWhole=0, newFrac
+
+  // own function (all you need to know is their sign is the same, else it doesnt matter)
+  // if the signs are both positive or both negative, it is magnitude addition
+    // add fractions
+    if (a.frac > a.frac + b.frac) { // carry over has occured
+      newFrac = a.frac + b.frac;
+      newWhole = 1;
     }
-    wholeSum++;
-  }
+    // carry over
 
-  //wholeSum += left.whole + right.whole;
-  if (wholeSum < left.whole) { // overflow with addition
-    Fixedpoint newFP =  fixedpoint_create_3(wholeSum, fracSum, left.sign, invalid);
-    newFP.overflow = over; 
-    return newFP;
-  } else {
-    return fixedpoint_create_3(wholeSum, fracSum, left.sign, valid);
-  }
-
-}
-
-int compare_magnitudes(Fixedpoint left, Fixedpoint right) {
-  if (left.whole > right.whole) {
-    return 1;
-  } else if (left.whole < right.whole) {
-    return -1;
-  } else {
-    if (left.frac > right.frac) {
-      return 1;
-    } else if (left.frac < right.frac) {
-      return -1;
+    // add whole
+    if (a.whole > a.whole + b.whole) {
+      // an overflow has occured, mark as overflows
     } else {
-      return 0;
+      newWhole += a.whole + b. whole
     }
-  }
-}
+    newFixedPoint (send to create_3)
 
-Fixedpoint magnitude_subtraction(Fixedpoint pos, Fixedpoint neg) {
-  Fixedpoint left = pos;
-  Fixedpoint right = neg;
-  int isNegative = 0; // to translate into enum well
-  if (compare_magnitudes(pos, neg) == -1) {
-    left = neg;
-    right = pos;
-    isNegative = 1;
-  }
+  // this is itsown function
+  if the signs are different, it is  magnitude subtraction
+  let a be positive and b be negative
+  if afrac < bfrac
+    borrow from whole (+0x8000.....000UL)
+    subtract as usual
+  if a.whole < b.whole
+    underflow
+  else 
+    subtract
+    }
 
+*/
 
-  uint64_t newFrac = left.frac - right.frac;
-  uint64_t newWhole = left.whole - right.whole;
-  if (left.frac < right.frac) {
-    newWhole--;
-  }
-
-  return (Fixedpoint) {.whole = newWhole, .frac = newFrac, 
-                      .sign = isNegative, .overflow = notOver, 
-                      .underflow = notUnder, .validity = valid};
-}
-
+// Emily
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
-  if (left.sign == right.sign) {
-    return magnitude_addition(left, right);
-  } else if (left.sign == negative) {
-    return magnitude_subtraction(right, left);
+  // TODO: implement
+  
+  if ((left.sign == negative && right.sign == negative) || (right.sign == positive && left.sign == positive)) {
+    return fixedpoint_add_case_same_sign(left, right);
+  } else if (left.sign == positive && right.sign == negative) {
+    return fixedpoint_add_case_diff_sign(left, right, true);
   } else {
-    return magnitude_subtraction(left, right); 
-  }
- }
- 
-Fixedpoint correct_sign_of_zero(Fixedpoint zero) {
-  if (zero.validity == valid && fixedpoint_is_zero(zero)) {
-    zero.sign = positive;
-    return zero;
+    return fixedpoint_add_case_diff_sign(right, left, false);
   }
 
-  return zero;
+}
+
+Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg, int swapped) 
+{
+  uint64_t newFrac = pos.frac - neg.frac;
+  uint64_t newWhole = 0;
+  uint64_t carry = 0;
+  Fixedpoint toReturn;
+  bool isNeg = false;
+
+  if (pos.frac < neg.frac) {
+    //Will become negative, magnitude of newWhole is switched 
+    newFrac = neg.frac - pos.frac;
+  }
+  
+  if (swapped == 1) {
+    newFrac = 0x0000000000000000 - newFrac;
+    carry = 1;
+  }
+
+  if (pos.whole < neg.whole) {
+    newWhole = neg.whole - pos.whole - carry;
+    isNeg = true;
+  } else {
+    newWhole = pos.whole - neg.whole - carry;
+  }
+
+if (newWhole > pos.whole) {
+//Overflow
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNeg, 0);
+    toReturn.overflow = over;
+  } else {
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNeg, 0);
+  }
+  return toReturn;
+}
+
+Fixedpoint fixedpoint_add_case_same_sign(Fixedpoint left, Fixedpoint right) 
+{
+  uint64_t newFrac = left.frac + right.frac;
+  uint64_t newWhole = left.whole + right.whole;
+  Fixedpoint toReturn;
+  bool isNegative = right.sign == 1;
+
+  if (newFrac < left.frac && newFrac < right.frac) { 
+    newWhole += 1;
+  }
+
+  if (newWhole < left.whole || newWhole < right.whole) {
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNegative, 0);
+    toReturn.overflow = over;
+  } else {
+    toReturn = fixedpoint_create_3(newWhole, newFrac, isNegative, 0);
+  }
+  return toReturn;
 }
 
 // Emily
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
-  Fixedpoint newFP;
-  
-  if (left.sign == positive && right.sign == positive) {
-    newFP = magnitude_subtraction(left, right);
-  } else if (left.sign == negative && right.sign == positive) {
-    // (-) - (+) = (-) + (-)
-    newFP = magnitude_addition(left, right);
-  } else if (left.sign == positive && right.sign == negative) {
-    // (+) - (-) = (+) + (+)
-    newFP = magnitude_addition(left, right);
-  } else if (left.sign == negative && right.sign == negative) {
-    newFP = magnitude_subtraction(right, left);
-  } 
+  Fixedpoint negatedRight = fixedpoint_negate(right);
+  Fixedpoint diff;
 
-  return correct_sign_of_zero(newFP);
-} 
+  if (left.sign == negatedRight.sign) {
+    return fixedpoint_add_case_same_sign(left, negatedRight);
+  } else if (left.sign == positive && negatedRight.sign == negative) {
+    return fixedpoint_add_case_diff_sign(left, negatedRight, false);
+  } else {
+    return fixedpoint_add_case_diff_sign(negatedRight, left, true);
+  }
+}
 
 // aya
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
   if (fixedpoint_is_zero(val)) {
-    // just make sure it's zero
-    val.sign = positive;
     return val;
   } else if (val.sign == positive) {
     val.sign = negative;
@@ -204,10 +241,14 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   uint64_t mask = 1UL;
   uint64_t underflowing = 0;
 
+  //printf("\nBefore: %lu.%lu    ", val.whole, val.frac);
+  //uint64_t mostSignificantBit = 1 << val.frac;
   if ((mask & val.whole) == mask) {
     underflowing = 0x8000000000000000UL;
   }
   val.whole = val.whole >> 1;
+  
+  //mostSignificantBit = 1 << val.whole;
 
   if ((mask & val.frac) == mask) {
     val.underflow = under;
@@ -215,6 +256,7 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   } else {
     val.frac = val.frac >> 1;
     val.frac += underflowing;
+    //printf("Now: %lu.%lu\n", val.whole, val.frac);
     return val;
   }
 }
@@ -225,6 +267,7 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
   uint64_t mask = 1UL << 63;
   uint64_t overflowing = 0;
 
+  //uint64_t mostSignificantBit = 1 << val.frac;
   if ((mask & val.frac) == mask) {
     overflowing++;
   }
@@ -242,27 +285,15 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
 }
 
 // emily
-
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
-  if (left.sign == negative && right.sign == positive) {
-    return -1;
-  } else if (left.sign == positive && right.sign == negative) {
-    return 1;
+  Fixedpoint subtracted = fixedpoint_sub(left, right);
+  if (fixedpoint_is_zero(subtracted)) {
+    return 0;
   }
-
-  if (left.whole > right.whole) {
-    return 1;
-  } else if (left.whole < right.whole) {
+  if (fixedpoint_is_neg(subtracted)) {
     return -1;
-  } else {
-    if (left.frac > right.frac) {
-      return 1;
-    } else if (left.frac < right.frac) {
-      return -1;
-    } else {
-      return 0;
-    }
   }
+  return 1;
 }
 
 
@@ -276,6 +307,7 @@ int fixedpoint_is_zero(Fixedpoint val) {
 
 // aya
 int fixedpoint_is_err(Fixedpoint val) {
+  // TODO: implement
   return (val.overflow == over) || (val.underflow == under) || (val.validity == invalid);
 }
 
@@ -288,27 +320,34 @@ int fixedpoint_is_neg(Fixedpoint val) {
 }
 
 // Aya
+// Should this be val.overflow == over?
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
+  // TODO: implement
   return (val.overflow == over) && (val.sign == negative);;
 }
 
 // Emily
+// Should this be val.overflow == over?
 int fixedpoint_is_overflow_pos(Fixedpoint val) {
+  // TODO: implement
   return (val.overflow == over) && (val.sign == positive);
 }
 
 // Aya
 int fixedpoint_is_underflow_neg(Fixedpoint val) {
+  // TODO: implement
   return (val.underflow == under) && (val.sign == negative);
 }
 
 // Emily
 int fixedpoint_is_underflow_pos(Fixedpoint val) {
+  // TODO: implement
   return (val.underflow == under) && (val.sign == positive);
 }
 
 // Aya
 int fixedpoint_is_valid(Fixedpoint val) {
+  // TODO: implement
   return val.validity == valid;
 }
 
@@ -317,6 +356,7 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
   char *s = (char*) calloc(100, sizeof(char));
   if (val.sign == negative) {
     strcat(s, "-");
+    printf("\nin val, now %s\n", s);
   }
 
   char final[20] = "";
