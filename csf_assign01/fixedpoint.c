@@ -104,7 +104,8 @@ Fixedpoint magnitude_addition(Fixedpoint left, Fixedpoint right) {
   } else {
     return fixedpoint_create_3(wholeSum, fracSum, left.sign, valid);
   }
-
+  //
+  return DUMMY;
 }
 
 int compare_magnitudes(Fixedpoint left, Fixedpoint right) {
@@ -289,7 +290,8 @@ int fixedpoint_is_neg(Fixedpoint val) {
 
 // Aya
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
-  return (val.overflow == over) && (val.sign == negative);;
+  // TODO: implement
+  return (val.overflow == over) && (val.sign == negative);
 }
 
 // Emily
