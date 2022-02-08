@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   //TEST(test_create_from_hex);
    //TEST(test_format_as_hex);
   //TEST(test_negate);
-  //TEST(test_add);
+  TEST(test_add);
   TEST(test_sub);
   // TEST(test_is_overflow_pos);
   //TEST(test_is_err);
@@ -429,9 +429,7 @@ void test_add(TestObjs *objs) {
   rhs = fixedpoint_create_from_hex("583933917180fb.39");
   sum = fixedpoint_add(lhs, rhs);
   ASSERT(!fixedpoint_is_neg(sum));
-  //One too high: should end in b but it ends in c
   ASSERT(0x58392ca5bd2b2bUL == fixedpoint_whole_part(sum));
-  //frac is not inverted
   ASSERT(0x8900000000000000UL == fixedpoint_frac_part(sum));
 
   lhs = fixedpoint_create_from_hex("-d5206e.8");
@@ -441,7 +439,15 @@ void test_add(TestObjs *objs) {
   ASSERT(0xd5206dUL == fixedpoint_whole_part(sum));
   ASSERT(0x402371b130000000UL == fixedpoint_frac_part(sum));
 
-
+  lhs = fixedpoint_create2(UINT64_MAX, 0UL);
+  rhs = fixedpoint_create_from_hex("1.0");
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_overflow_pos(sum) == 1);
+  
+  lhs = fixedpoint_create2(UINT64_MAX, 0UL);
+  rhs = fixedpoint_create_from_hex("1.0");
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_overflow_pos(sum) == 1);
 }
 
 void test_double(TestObjs *objs) {
