@@ -266,16 +266,21 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   }
 
   // consider case where both are negative
+  int indicator = 1;
+
+  if (left.sign == negative) {
+    indicator = -1;
+  }
 
   if (left.whole > right.whole) {
-    return 1;
+    return 1 * indicator;
   } else if (left.whole < right.whole) {
-    return -1;
+    return -1 * indicator;
   } else {
     if (left.frac > right.frac) {
-      return 1;
+      return 1 * indicator;
     } else if (left.frac < right.frac) {
-      return -1;
+      return -1 * indicator;
     } else {
       return 0;
     }
