@@ -150,6 +150,20 @@ void test_compare(TestObjs *objs) {
   Fixedpoint compare17 = fixedpoint_create_from_hex("1.8");
   Fixedpoint compare18 = fixedpoint_create_from_hex("-1.8");
   ASSERT(1  == fixedpoint_compare(compare17, compare18));
+
+  // -a.b > -c.d
+  Fixedpoint compare19 = fixedpoint_create_from_hex("-1.8");
+  Fixedpoint compare20 = fixedpoint_create_from_hex("-8.5");
+  ASSERT(1 == fixedpoint_compare(compare19, compare20));
+
+  // -a.b < 0
+  Fixedpoint compare21 = fixedpoint_create_from_hex("-1.8");
+  Fixedpoint zero = objs->zero;
+  ASSERT(-1 == fixedpoint_compare(compare21, zero));
+
+  // a.b > 0
+  compare21 = fixedpoint_negate(compare21);
+  ASSERT(1 == fixedpoint_compare(compare21, zero));
 }
 
 void test_whole_part(TestObjs *objs) {
@@ -173,7 +187,7 @@ void test_frac_part(TestObjs *objs) {
 void test_create_from_hex(TestObjs *objs) {
   (void) objs;
 
-  //Might've found an error here with representation although i'm not sure
+  //Might've found an error here with representation although im not sure
   Fixedpoint val0 = fixedpoint_create_from_hex("d73533cd5.ffb28a49");
   ASSERT(fixedpoint_is_valid(val0));
   ASSERT(0xd73533cd5UL == fixedpoint_whole_part(val0));
@@ -349,14 +363,6 @@ void test_add(TestObjs *objs) {
   sum = fixedpoint_add(lhs, rhs);
   ASSERT(sum.whole == 1UL);
   ASSERT(sum.frac == 0UL);
-
-  lhs = fixedpoint_create_from_hex("0");
-  rhs = fixedpoint_create_from_hex("-1");
-  sum = fixedpoint_add(lhs, rhs);
-  //ASSERT(sum.overflow == over);
-  //ASSERT(sum.sign == negative);
-  //ASSERT(fixedpoint_is_err(sum));
-  //ASSERT(sum.validity == invalid);
 
   lhs = fixedpoint_create_from_hex("1.8");
   rhs = fixedpoint_create_from_hex("-0.8");

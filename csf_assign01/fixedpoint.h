@@ -84,10 +84,6 @@ uint64_t fixedpoint_frac_part(Fixedpoint val);
 //   the overflow was positive or negative)
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right);
 
-Fixedpoint fixedpoint_add_case_diff_sign(Fixedpoint pos, Fixedpoint neg, int swapped);
-
-Fixedpoint fixedpoint_add_case_same_sign(Fixedpoint left, Fixedpoint right);
-
 // Compute the difference of two valid Fixedpoint values.
 //
 // Parameters:
