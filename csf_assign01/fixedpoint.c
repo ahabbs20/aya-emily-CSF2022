@@ -6,9 +6,6 @@
 #include <assert.h>
 #include "fixedpoint.h"
 
-// You can remove this once all of the functions are fully implemented
-static Fixedpoint DUMMY;
-
 Fixedpoint fixedpoint_create(uint64_t whole) {
   Fixedpoint newFixedPoint = (Fixedpoint) { .whole = whole, .frac = 0UL,
 					    .sign = positive, .overflow = notOver,
@@ -33,6 +30,22 @@ Fixedpoint fixedpoint_create_3(uint64_t whole, uint64_t frac, bool isNegative, i
 					    .sign = sign, .overflow = notOver,
 					    .underflow = notUnder, .validity = isValid};
 
+}
+
+int compare_magnitudes(Fixedpoint left, Fixedpoint right) {
+  if (left.whole > right.whole) {
+    return 1;
+  } else if (left.whole < right.whole) {
+    return -1;
+  } else {
+    if (left.frac > right.frac) {
+      return 1;
+    } else if (left.frac < right.frac) {
+      return -1;
+    } else {
+      return 0;
+    }
+  }
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
@@ -83,22 +96,8 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
    return val.frac;
 }
 
-/*
-  carry has allowed it to go all the way back to one of the numbers
-
-  took a very large number
-  overflowed it just enough to be 1 less than smaller
-  + 1 makes it smaller
-
-  apply to carry and apply to one of the sides
-  and then check for overflow check
-*/
-
 Fixedpoint magnitude_addition(Fixedpoint left, Fixedpoint right) {
   uint64_t fracSum = left.frac + right.frac;
-
-  uint64_t leftWhole = left.whole;
-  uint64_t rightWhole = right.whole;
 
   uint64_t wholeSum = left.whole + right.whole;
 
@@ -122,26 +121,27 @@ Fixedpoint magnitude_addition(Fixedpoint left, Fixedpoint right) {
 
 }
 
-int compare_magnitudes(Fixedpoint left, Fixedpoint right) {
-  if (left.whole > right.whole) {
-    return 1;
-  } else if (left.whole < right.whole) {
+int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
+  if (left.sign == negative && right.sign == positive) {
     return -1;
-  } else {
-    if (left.frac > right.frac) {
-      return 1;
-    } else if (left.frac < right.frac) {
-      return -1;
-    } else {
-      return 0;
-    }
+  } else if (left.sign == positive && right.sign == negative) {
+    return 1;
   }
+
+  // consider case where both are negative
+  int indicator = 1;
+
+  if (left.sign == negative) {
+    indicator = -1;
+  }
+
+  return indicator * compare_magnitudes(left, right);
 }
 
 Fixedpoint magnitude_subtraction(Fixedpoint pos, Fixedpoint neg) {
   Fixedpoint left = pos;
   Fixedpoint right = neg;
-  int isNegative = 0; // to translate into enum well
+  int isNegative = 0; // in the enum, this is positive
   if (compare_magnitudes(pos, neg) == -1) {
     left = neg;
     right = pos;
@@ -168,8 +168,8 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   } else {
     return magnitude_subtraction(left, right); 
   }
- }
- 
+}
+
 Fixedpoint correct_sign_of_zero(Fixedpoint zero) {
   if (zero.validity == valid && fixedpoint_is_zero(zero)) {
     zero.sign = positive;
@@ -179,7 +179,6 @@ Fixedpoint correct_sign_of_zero(Fixedpoint zero) {
   return zero;
 }
 
-// Emily
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   Fixedpoint newFP;
   
@@ -198,7 +197,6 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   return correct_sign_of_zero(newFP);
 } 
 
-// aya
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
   if (fixedpoint_is_zero(val)) {
     // just make sure it's zero
@@ -213,7 +211,6 @@ Fixedpoint fixedpoint_negate(Fixedpoint val) {
   }
 }
 
-// Aya
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
   // location of msb
   uint64_t mask = 1UL;
@@ -234,7 +231,6 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   }
 }
 
-// Aya
 Fixedpoint fixedpoint_double(Fixedpoint val) {
   // location of msb
   uint64_t mask = 1UL << 63;
@@ -256,38 +252,6 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
   }
 }
 
-// emily
-
-int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
-  if (left.sign == negative && right.sign == positive) {
-    return -1;
-  } else if (left.sign == positive && right.sign == negative) {
-    return 1;
-  }
-
-  // consider case where both are negative
-  int indicator = 1;
-
-  if (left.sign == negative) {
-    indicator = -1;
-  }
-
-  if (left.whole > right.whole) {
-    return 1 * indicator;
-  } else if (left.whole < right.whole) {
-    return -1 * indicator;
-  } else {
-    if (left.frac > right.frac) {
-      return 1 * indicator;
-    } else if (left.frac < right.frac) {
-      return -1 * indicator;
-    } else {
-      return 0;
-    }
-  }
-}
-
-
 int fixedpoint_is_zero(Fixedpoint val) {
   if ((val.validity == valid) && (val.whole == 0) && (val.frac == 0)) {
     return 1;
@@ -296,12 +260,10 @@ int fixedpoint_is_zero(Fixedpoint val) {
   }
 }
 
-// aya
 int fixedpoint_is_err(Fixedpoint val) {
   return (val.overflow == over) || (val.underflow == under) || (val.validity == invalid);
 }
 
-// emily
 int fixedpoint_is_neg(Fixedpoint val) {
   if ((val.validity == valid) && (val.sign == negative)) {
     return !fixedpoint_is_zero(val);
@@ -309,33 +271,27 @@ int fixedpoint_is_neg(Fixedpoint val) {
   return 0;
 }
 
-// Aya
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
   // TODO: implement
   return (val.overflow == over) && (val.sign == negative);
 }
 
-// Emily
 int fixedpoint_is_overflow_pos(Fixedpoint val) {
   return (val.overflow == over) && (val.sign == positive);
 }
 
-// Aya
 int fixedpoint_is_underflow_neg(Fixedpoint val) {
   return (val.underflow == under) && (val.sign == negative);
 }
 
-// Emily
 int fixedpoint_is_underflow_pos(Fixedpoint val) {
   return (val.underflow == under) && (val.sign == positive);
 }
 
-// Aya
 int fixedpoint_is_valid(Fixedpoint val) {
   return val.validity == valid;
 }
 
-// Pair code together
 char *fixedpoint_format_as_hex(Fixedpoint val) {
   char *s = (char*) calloc(100, sizeof(char));
   if (val.sign == negative) {
@@ -343,8 +299,6 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
   }
 
   char final[20] = "";
-
-  //char *final = (char*) malloc(20 * sizeof(char));
   sprintf(final, "%lx", val.whole);
   strcat(s, final);
 

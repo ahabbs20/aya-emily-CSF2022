@@ -31,6 +31,9 @@ void test_sub(TestObjs *objs);
 void test_double(TestObjs *objs);
 void test_halve(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
+void test_is_overflow_neg(TestObjs *objs);
+void test_is_underflow_pos(TestObjs *objs);
+void test_is_underflow_neg(TestObjs *objs);
 void test_is_err(TestObjs *objs);
 void test_compare(TestObjs *objs);
 // TODO: add more test functions
@@ -44,19 +47,26 @@ int main(int argc, char **argv) {
 
   TEST_INIT();
 
-  TEST(test_compare);
-
   TEST(test_whole_part);
   TEST(test_frac_part);
+
   TEST(test_create_from_hex);
   TEST(test_format_as_hex);
+
   TEST(test_negate);
+
   TEST(test_add);
   TEST(test_sub);
-  TEST(test_is_overflow_pos);
-  TEST(test_is_err);
+
   TEST(test_double);
   TEST(test_halve);
+
+  TEST(test_is_overflow_pos);
+  TEST(test_is_overflow_neg);
+
+  TEST(test_is_err);
+  
+  TEST(test_compare);
 
   // IMPORTANT: if you add additional test functions (which you should!),
   // make sure they are included here.  E.g., if you add a test function
@@ -88,6 +98,7 @@ void cleanup(TestObjs *objs) {
 }
 
 void test_compare(TestObjs *objs) {
+  (void) objs;
   // Let a.b, c.d
 
   // a.b == c.d
@@ -160,7 +171,6 @@ void test_frac_part(TestObjs *objs) {
 }
 
 void test_create_from_hex(TestObjs *objs) {
-  // Note, the number is 258627685.242
   (void) objs;
 
   //Might've found an error here with representation although i'm not sure
@@ -441,107 +451,6 @@ void test_add(TestObjs *objs) {
   ASSERT(fixedpoint_is_overflow_pos(sum) == 1);
 }
 
-void test_double(TestObjs *objs) {
-  (void) objs;
-  // doubling 1 makes 2
-  Fixedpoint doubled_one = fixedpoint_double(objs->one);
-  ASSERT(2UL == doubled_one.whole);
-  ASSERT(0UL == doubled_one.frac);
-  
-  // doubling 0 makes 0
-  Fixedpoint doubled_zero = fixedpoint_double(objs->zero);
-  ASSERT(0UL == doubled_zero.whole);
-  ASSERT(0UL == doubled_zero.frac);
-
-  // doubling .25 makes .5
-  Fixedpoint doubled_one_fourth = fixedpoint_double(objs->one_fourth);
-  ASSERT(0UL == doubled_one_fourth.whole);
-  ASSERT(0x8000000000000000UL == doubled_one_fourth.frac);
-
-  // doubling negatives does not change sign
-  doubled_one = objs->one;
-  doubled_one = fixedpoint_negate(doubled_one);
-  doubled_one = fixedpoint_double(doubled_one);
-  ASSERT(2UL == doubled_one.whole);
-  ASSERT(0UL == doubled_one.frac);
-  ASSERT(fixedpoint_is_neg(doubled_one));
-  
-  // double carries over into whole
-  // 0 + 2(.5)
-  Fixedpoint doubled_one_half = fixedpoint_double(objs->one_half);
-  ASSERT(1UL == doubled_one_half.whole);
-  ASSERT(0UL == doubled_one_half.frac);
-  
-  // doubling with both whole and frac
-  Fixedpoint doubled_real1 = fixedpoint_create2(1UL, 0x4000000000000000UL);
-  doubled_real1 = fixedpoint_double(doubled_real1);
-  ASSERT(2UL == doubled_real1.whole);
-  ASSERT(0x8000000000000000UL == doubled_real1.frac);
-
-  Fixedpoint doubled_real2 = fixedpoint_create2(1UL, 0x4000000000000000UL);
-  doubled_real2 = fixedpoint_double(doubled_real2);
-  ASSERT(2UL == doubled_real2.whole);
-  ASSERT(0x8000000000000000UL == doubled_real2.frac);
-
-  // double with carry over onto non-zero whole
-  Fixedpoint doubled_real3 = fixedpoint_create2(1UL, 0x8000000000000000UL);
-  doubled_real3 = fixedpoint_double(doubled_real3);
-  ASSERT(3UL == doubled_real3.whole);
-  ASSERT(0UL == doubled_real3.frac);
-
-  // double cutting off whole
-  Fixedpoint doubled_real4 = fixedpoint_create2(0x8000000000000000UL, 0);
-  doubled_real4 = fixedpoint_double(doubled_real4);
-  ASSERT(doubled_real4.overflow == over);
-  ASSERT(doubled_real4.validity == invalid);
-  // max * 2, note is cut off.
-
-  
-}
-
-void test_halve(TestObjs *objs) {
-  // 2 becomes 1
-  Fixedpoint two = fixedpoint_create2(2UL, 0UL);
-  Fixedpoint halved_two = fixedpoint_halve(two);
-  ASSERT(halved_two.whole == 1UL);
-  ASSERT(halved_two.frac == 0UL);
-
-  // 0 becomes 0
-  Fixedpoint halved_zero = objs->zero;
-  halved_zero = fixedpoint_halve(halved_zero);
-  ASSERT(halved_zero.whole == 0UL);
-  ASSERT(halved_zero.frac == 0UL);
-
-  // .5 becomes .25
-  Fixedpoint halved_half = objs->one_half;
-  halved_half = fixedpoint_halve(halved_half);
-  ASSERT(halved_half.whole == 0UL);
-  ASSERT(halved_half.frac == objs->one_fourth.frac);
-
-  // does not change sign
-  halved_half = objs->one_half;
-  halved_half = fixedpoint_negate(halved_half);
-  halved_half = fixedpoint_halve(halved_half);
-  ASSERT(halved_half.whole == 0UL);
-  ASSERT(halved_half.frac == objs->one_fourth.frac);
-  ASSERT(fixedpoint_is_neg(halved_half));
-
-  // 1 becomes .5
-  Fixedpoint halved_one = objs->one;
-  halved_one = fixedpoint_halve(halved_one);
-  ASSERT(halved_one.whole == 0UL);
-  ASSERT(halved_one.frac == objs->one_half.frac);
-  
-  // 3 becomes 1.5
-  Fixedpoint halved_real3 = fixedpoint_create2(3UL, 0UL);
-  halved_real3 = fixedpoint_halve(halved_real3);
-  ASSERT(1UL == halved_real3.whole);
-  ASSERT(0x8000000000000000UL == halved_real3.frac);
-
-  // 1.5 becomes .75
-  // lsb = 1 --> underflow
-}
-
 void test_sub(TestObjs *objs) {
   (void) objs;
 
@@ -664,6 +573,122 @@ void test_sub(TestObjs *objs) {
   
 }
 
+void test_double(TestObjs *objs) {
+  (void) objs;
+  // doubling 1 makes 2
+  Fixedpoint doubled_one = fixedpoint_double(objs->one);
+  ASSERT(2UL == doubled_one.whole);
+  ASSERT(0UL == doubled_one.frac);
+  
+  // doubling 0 makes 0
+  Fixedpoint doubled_zero = fixedpoint_double(objs->zero);
+  ASSERT(0UL == doubled_zero.whole);
+  ASSERT(0UL == doubled_zero.frac);
+
+  // doubling .25 makes .5
+  Fixedpoint doubled_one_fourth = fixedpoint_double(objs->one_fourth);
+  ASSERT(0UL == doubled_one_fourth.whole);
+  ASSERT(0x8000000000000000UL == doubled_one_fourth.frac);
+
+  // doubling negatives does not change sign
+  doubled_one = objs->one;
+  doubled_one = fixedpoint_negate(doubled_one);
+  doubled_one = fixedpoint_double(doubled_one);
+  ASSERT(2UL == doubled_one.whole);
+  ASSERT(0UL == doubled_one.frac);
+  ASSERT(fixedpoint_is_neg(doubled_one));
+  
+  // double carries over into whole
+  // 0 + 2(.5)
+  Fixedpoint doubled_one_half = fixedpoint_double(objs->one_half);
+  ASSERT(1UL == doubled_one_half.whole);
+  ASSERT(0UL == doubled_one_half.frac);
+  
+  // doubling with both whole and frac
+  Fixedpoint doubled_real1 = fixedpoint_create2(1UL, 0x4000000000000000UL);
+  doubled_real1 = fixedpoint_double(doubled_real1);
+  ASSERT(2UL == doubled_real1.whole);
+  ASSERT(0x8000000000000000UL == doubled_real1.frac);
+
+  Fixedpoint doubled_real2 = fixedpoint_create2(1UL, 0x4000000000000000UL);
+  doubled_real2 = fixedpoint_double(doubled_real2);
+  ASSERT(2UL == doubled_real2.whole);
+  ASSERT(0x8000000000000000UL == doubled_real2.frac);
+
+  // double with carry over onto non-zero whole
+  Fixedpoint doubled_real3 = fixedpoint_create2(1UL, 0x8000000000000000UL);
+  doubled_real3 = fixedpoint_double(doubled_real3);
+  ASSERT(3UL == doubled_real3.whole);
+  ASSERT(0UL == doubled_real3.frac);
+
+  // double cutting off whole
+  Fixedpoint doubled_real4 = fixedpoint_create2(0x8000000000000000UL, 0);
+  doubled_real4 = fixedpoint_double(doubled_real4);
+  ASSERT(doubled_real4.overflow == over);
+  ASSERT(doubled_real4.validity == invalid);
+  // max * 2, note is cut off.
+
+  
+}
+
+void test_halve(TestObjs *objs) {
+  // 2 becomes 1
+  Fixedpoint two = fixedpoint_create2(2UL, 0UL);
+  Fixedpoint halved_two = fixedpoint_halve(two);
+  ASSERT(halved_two.whole == 1UL);
+  ASSERT(halved_two.frac == 0UL);
+
+  // 0 becomes 0
+  Fixedpoint halved_zero = objs->zero;
+  halved_zero = fixedpoint_halve(halved_zero);
+  ASSERT(halved_zero.whole == 0UL);
+  ASSERT(halved_zero.frac == 0UL);
+
+  // .5 becomes .25
+  Fixedpoint halved_half = objs->one_half;
+  halved_half = fixedpoint_halve(halved_half);
+  ASSERT(halved_half.whole == 0UL);
+  ASSERT(halved_half.frac == objs->one_fourth.frac);
+
+  // does not change sign
+  halved_half = objs->one_half;
+  halved_half = fixedpoint_negate(halved_half);
+  halved_half = fixedpoint_halve(halved_half);
+  ASSERT(halved_half.whole == 0UL);
+  ASSERT(halved_half.frac == objs->one_fourth.frac);
+  ASSERT(fixedpoint_is_neg(halved_half));
+
+  // 1 becomes .5
+  Fixedpoint halved_one = objs->one;
+  halved_one = fixedpoint_halve(halved_one);
+  ASSERT(halved_one.whole == 0UL);
+  ASSERT(halved_one.frac == objs->one_half.frac);
+  
+  // 3 becomes 1.5
+  Fixedpoint halved_real3 = fixedpoint_create2(3UL, 0UL);
+  halved_real3 = fixedpoint_halve(halved_real3);
+  ASSERT(1UL == halved_real3.whole);
+  ASSERT(0x8000000000000000UL == halved_real3.frac);
+
+  // 1.5 becomes .75
+  Fixedpoint halved_real4 = fixedpoint_create2(1UL, 0x8000000000000000UL);
+  halved_real4 = fixedpoint_halve(halved_real4);
+  ASSERT(0UL == halved_real4.whole);
+  ASSERT(0xC000000000000000UL == halved_real4.frac);
+
+  // lsb = 1 --> underflow pos
+  Fixedpoint halved_real5 = fixedpoint_create2(0UL, 0x1UL);
+  halved_real5 = fixedpoint_halve(halved_real5);
+  ASSERT(fixedpoint_is_underflow_pos(halved_real5));
+
+  // lsb = -1 --> underflow neg
+  Fixedpoint halved_real6 = fixedpoint_create2(0UL, 0x1UL);
+  halved_real6 = fixedpoint_negate(halved_real6);
+  halved_real6 = fixedpoint_halve(halved_real6);
+  ASSERT(fixedpoint_is_underflow_neg(halved_real6));
+
+}
+
 void test_is_overflow_pos(TestObjs *objs) {
   Fixedpoint sum;
 
@@ -678,6 +703,79 @@ void test_is_overflow_pos(TestObjs *objs) {
   sum = fixedpoint_sub(objs->max, negative_one);
   ASSERT(fixedpoint_is_overflow_pos(sum));
 }
+
+void test_is_overflow_neg(TestObjs *objs) {
+  Fixedpoint sum;
+
+  Fixedpoint negative_max = fixedpoint_negate(objs->max);
+  Fixedpoint negative_one = fixedpoint_negate(objs->one);
+
+  // smallest negative - 1
+  sum = fixedpoint_add(negative_max, negative_one);
+  ASSERT(fixedpoint_is_overflow_neg(sum));
+
+  sum = fixedpoint_add(negative_one, negative_max);
+  ASSERT(fixedpoint_is_overflow_neg(sum));
+
+  sum = fixedpoint_sub(negative_max, objs->one);
+  ASSERT(fixedpoint_is_overflow_neg(sum));
+}
+
+void test_is_underflow_pos(TestObjs *objs) {
+  Fixedpoint halved_num;
+
+  // occurs when halve shifts right and you lose data
+  // .000....0001 >> 1 --> .0000000...00000_
+  halved_num = fixedpoint_create2(0UL, 0x1UL);
+  halved_num = fixedpoint_halve(halved_num);
+  ASSERT(fixedpoint_is_underflow_pos(halved_num));
+
+  // shifting a negative should not through underflow_pos
+  halved_num = fixedpoint_negate(fixedpoint_create2(0UL, 0x1UL));
+  halved_num = fixedpoint_halve(halved_num);
+  ASSERT(!fixedpoint_is_underflow_pos(halved_num));
+
+  // should not throw under_pos when no underflow has
+  halved_num = fixedpoint_create2(1UL, 0UL);
+  halved_num = fixedpoint_halve(halved_num);
+  ASSERT(!fixedpoint_is_underflow_pos(halved_num));
+
+  // should not occur when doubling a positive (overflow)
+  halved_num = objs->max;
+  halved_num = fixedpoint_double(halved_num);
+  ASSERT(fixedpoint_is_overflow_pos(halved_num));
+  ASSERT(!fixedpoint_is_underflow_pos(halved_num)); // this is overflow pos, just not underflow pos
+}
+
+void test_is_underflow_neg(TestObjs *objs) {
+  Fixedpoint halved_num;
+  // occurs when halve shifts right and you lose data
+  // .000....0001 >> 1 --> .0000000...00000_
+  halved_num = fixedpoint_negate(fixedpoint_create2(0UL, 0x1UL));
+  halved_num = fixedpoint_halve(halved_num);
+  ASSERT(fixedpoint_is_underflow_neg(halved_num));
+
+  // shifting a pos should not through underflow_neg
+  halved_num = fixedpoint_create2(0UL, 0x1UL);
+  halved_num = fixedpoint_halve(halved_num);
+  ASSERT(!fixedpoint_is_underflow_neg(halved_num));
+
+  // should not throw under_neg when no underflow has
+  halved_num = fixedpoint_negate(objs->max);
+  halved_num = fixedpoint_halve(halved_num);
+  ASSERT(!fixedpoint_is_underflow_neg(halved_num));
+
+  // should not occur when doubling a positive into overflow
+  halved_num = objs->max;
+  halved_num = fixedpoint_double(halved_num);
+  ASSERT(!fixedpoint_is_underflow_neg(halved_num));
+
+  // should not occur when when doubly a negative into overflow
+  halved_num = fixedpoint_negate(objs->max);
+  halved_num = fixedpoint_double(halved_num);
+  ASSERT(!fixedpoint_is_underflow_neg(halved_num));
+}
+
 
 void test_is_err(TestObjs *objs) {
   (void) objs;
@@ -721,4 +819,3 @@ void test_is_err(TestObjs *objs) {
   
 }
 
-// TODO: implement more test functions
