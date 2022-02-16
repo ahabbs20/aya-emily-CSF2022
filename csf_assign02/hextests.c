@@ -50,6 +50,9 @@ void testFormatOffset(TestObjs *objs) {
   char buf[16];
   hex_format_offset(1L, buf);
   ASSERT(0 == strcmp(buf, "00000001"));
+
+  hex_format_offset(16L, buf);
+  ASSERT(0 == strcmp(buf, "00000010"));
 }
 
 void testFormatByteAsHex(TestObjs *objs) {
