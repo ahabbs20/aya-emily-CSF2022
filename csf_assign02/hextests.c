@@ -63,5 +63,17 @@ void testFormatByteAsHex(TestObjs *objs) {
 
 void testHexToPrintable(TestObjs *objs) {
   ASSERT('H' == hex_to_printable(objs->test_data_1[0]));
+  ASSERT('e' == hex_to_printable(objs->test_data_1[1]));
+  ASSERT('l' == hex_to_printable(objs->test_data_1[2]));
+  ASSERT('l' == hex_to_printable(objs->test_data_1[3]));
+  ASSERT('o' == hex_to_printable(objs->test_data_1[4]));
+  ASSERT(',' == hex_to_printable(objs->test_data_1[5]));
+  ASSERT(' ' == hex_to_printable(objs->test_data_1[6]));
+  ASSERT('w' == hex_to_printable(objs->test_data_1[7]));
+  ASSERT('o' == hex_to_printable(objs->test_data_1[8]));
+  ASSERT('r' == hex_to_printable(objs->test_data_1[9]));
+  ASSERT('l' == hex_to_printable(objs->test_data_1[10]));
+  ASSERT('d' == hex_to_printable(objs->test_data_1[11]));
+  ASSERT('!' == hex_to_printable(objs->test_data_1[12]));
   ASSERT('.' == hex_to_printable(objs->test_data_1[13]));
 }
