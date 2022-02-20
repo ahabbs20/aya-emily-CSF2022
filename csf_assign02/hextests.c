@@ -11,6 +11,7 @@
 typedef struct {
   char test_data_1[16];
   char test_data_2[16];
+  char test_data_3[16];
 } TestObjs;
 
 // setup function (to create the test fixture)
@@ -18,6 +19,7 @@ TestObjs *setup(void) {
   TestObjs *objs = malloc(sizeof(TestObjs));
   strcpy(objs->test_data_1, "Hello, world!\n");
   strcpy(objs->test_data_2, "\n\n 123456789 \n");
+  strcpy(objs->test_data_3, "~!@#$%^&*()_+=}");
   return objs;
 }
 
@@ -95,5 +97,21 @@ void testHexToPrintable(TestObjs *objs) {
   ASSERT('9' == hex_to_printable(objs->test_data_2[11]));
   ASSERT(' ' == hex_to_printable(objs->test_data_2[12]));
   ASSERT('.' == hex_to_printable(objs->test_data_2[13]));
-
+  
+  //~!@#$%^&*()_+=}{
+  ASSERT('~' == hex_to_printable(objs->test_data_3[0]));
+  ASSERT('!' == hex_to_printable(objs->test_data_3[1]));
+  ASSERT('@' == hex_to_printable(objs->test_data_3[2]));
+  ASSERT('#' == hex_to_printable(objs->test_data_3[3]));
+  ASSERT('$' == hex_to_printable(objs->test_data_3[4]));
+  ASSERT('%' == hex_to_printable(objs->test_data_3[5]));
+  ASSERT('^' == hex_to_printable(objs->test_data_3[6]));
+  ASSERT('&' == hex_to_printable(objs->test_data_3[7]));
+  ASSERT('*' == hex_to_printable(objs->test_data_3[8]));
+  ASSERT('(' == hex_to_printable(objs->test_data_3[9]));
+  ASSERT(')' == hex_to_printable(objs->test_data_3[10]));
+  ASSERT('_' == hex_to_printable(objs->test_data_3[11]));
+  ASSERT('+' == hex_to_printable(objs->test_data_3[12]));
+  ASSERT('=' == hex_to_printable(objs->test_data_3[13]));
+  ASSERT('}' == hex_to_printable(objs->test_data_3[14]));
 }
