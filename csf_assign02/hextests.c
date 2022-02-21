@@ -1,6 +1,8 @@
 // Unit tests for hex functions
 // These tests should work for both your C implementations and your
 // assembly language implementations
+/* Emily Berger - eberge11@jh.edu
+   Aya Habbas - ahabbas1@jh.edu */
 
 #include <stdio.h>
 #include <stdlib.h>

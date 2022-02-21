@@ -1,4 +1,6 @@
-Partners: Emily Berger, Aya Habbas
+Partners:
+Emily Berger - eberge11@jh.edu
+Aya Habbas - ahabbas1@jh.edu
 
 Contributions A2M1: 
 
