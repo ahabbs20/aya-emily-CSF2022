@@ -68,15 +68,6 @@ void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]) {
             sbuf[index--] = (char) temp + 87L;
         }
 
-        /*
-        // if between 0 and 9, add 30 and convert to hex.
-        if (temp >= 0 && temp <= 9) {
-            sbuf[index--] = (char) temp + 48L;
-        } else if (temp >= 10 && temp <= 15) {
-            sbuf[index--] = (char) temp + 87L;
-        }
-        */
-
         num = num >> 4;
     }
 
