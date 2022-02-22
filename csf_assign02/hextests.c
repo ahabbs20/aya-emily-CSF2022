@@ -15,9 +15,9 @@ typedef struct {
   char test_data_2[16];
   char test_data_3[16];
   char test_data_4[16];
-  char test_data_5[3];
+  char test_data_5[16];
   char test_data_6[16];
-  char test_data_7[3];
+  char test_data_7[16];
 } TestObjs;
 
 // setup function (to create the test fixture)
@@ -27,9 +27,9 @@ TestObjs *setup(void) {
   strcpy(objs->test_data_2, "\n\n 123456789 \n");
   strcpy(objs->test_data_3, "~!@#$%^&*()_+=}");
   strcpy(objs->test_data_4, "\x1\x1\x2\x3\x4\x5\x6\x7\x8\x9\xa\xb\xc\xd\xe"); //1-14 non printable
-  strcpy(objs->test_data_5, "\x1f\x20"); //31 and 32 (range of printable is 32 and up inclusive)
-  strcpy(objs->test_data_6, "\x7e\x7f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c"); //126 and up (range of printable is up to and includes 126
-  strcpy(objs->test_data_7, "\xfe\xff"); //Upper range of non-printable (254 and 255)
+  strcpy(objs->test_data_5, "\x1f\x20\x0"); //31 and 32 (range of printable is 32 and up inclusive)
+  strcpy(objs->test_data_6, "\x7e\x7f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c"); //126 and up (range of printable is up to and includes 126)
+  strcpy(objs->test_data_7, "\xfe\xff\x0"); //Upper range of non-printable (254 and 255)
   return objs;
 }
 
