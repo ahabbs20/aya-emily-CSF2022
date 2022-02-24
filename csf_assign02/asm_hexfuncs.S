@@ -10,10 +10,93 @@
 
 	/* TODO: add functions here */
 
-.globl hex_format_offset
-hex_format_offset:
+.globl hex_read
+hex_read:
+	pushq %rbp
+	subq $16, %rsp
+	movq %rsp, %rbp
+
+	//rdi has data_buf
+	//store return values in rax
+	//return read(0, data_buf, 16
+	movq %rdi, %rsi  //move data_buf into second argument for function
+	movq $0, %rdi  //move 0 into first argument for function read
+	movq $16, %rdx  //move 16 into third argument for function read	
+	movq $0, %rax
+
+	call read  //will return an int in %rax
+
+	addq $16, %rsp
+	popq %rbp
 	ret
 
+.globl hex_write_string
+hex_write_string:
+	//rdi has data_buf
+	pushq %rbp
+	subq $16, %rsp
+	movq %rsp, %rbp
+	pushq %rbx
+	pushq %r12
+	pushq %r13
+	movq $0, %rbx //Index
+	movq %rdi, %r12  //data_buf
+
+	.LWhileNotNullTerminator:
+		movq (%r12, %rbx, 1), %r13 //store r12[rbx] in r9
+		cmpq $0x00, %r13 //if it is a null terminator
+		je .LExitLoop //exit the loop
+		movq $1, %rdi //otherwise set first term to be 1
+		movq $1, %rdx //set third term to be 1 as well
+		movq %r13, %rsi //set character
+		
+		call write
+		
+		incq %rbx
+		jmp .LWhileNotNullTerminator
+	.LExitLoop:
+		popq %r13
+		popq %r12
+		popq %rbx
+		addq $16, %rsp
+		popq %rbp
+		ret
+
+.globl hex_format_offset
+hex_format_offset:
+	subq $8, %rsp
+	movq %rdi, %r8 //Move offset to r8
+	movq $0, %r9  //Move increasing index to r9
+	movq $7, %r10 //Move decreasing index to r10
+	//rsi is the buf
+	.LMainLoopBody:
+		cmpq $8, %r9
+		je .LDone
+		movq %r8, %r11  //r11 will be temp
+		andq $0xf, %r11 //temp is anded with 0xf
+		cmpq $9, %r11 //Compare temp to 9
+		jg .LGreaterThan9 //if it is greater than 9, jump to that point
+		//It will be greater than 0 (unsigned)
+		addq $48L, %r11 //Add 48 to it
+		movb %r11b, (%rsi, %r10, 1)
+		decq %r10
+		jmp .LContinueLoop
+	.LGreaterThan9:
+		cmpq $15, %r11
+		jg .LContinueLoop
+		addq $87L, %r11 //Add 87 to it
+		movb %r11b, (%rsi, %r10, 1)
+		decq %r10
+		jmp .LContinueLoop
+	.LContinueLoop:
+		shrq $4, %r8
+		incq %r9
+		jmp .LMainLoopBody
+	.LDone: 
+		movq $8, %r10
+		movb $0x00, 8(%rsi)
+		addq $8, %rsp
+		ret
 
 
 .globl hex_format_byte_as_hex
