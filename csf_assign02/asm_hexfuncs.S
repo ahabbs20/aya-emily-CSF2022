@@ -13,46 +13,47 @@
 .globl hex_read
 hex_read:
 	pushq %rbp
-	subq $16, %rsp
+	subq $16, % // i thought when you call a function, it's subq 8, not 16?
 	movq %rsp, %rbp
 
 	//rdi has data_buf
 	//store return values in rax
-	//return read(0, data_buf, 16
-	movq %rdi, %rsi  //move data_buf into second argument for function
-	movq $0, %rdi  //move 0 into first argument for function read
-	movq $16, %rdx  //move 16 into third argument for function read	
+	//return read(0, data_buf, 16)
+	movq $0, %rdi     //move 0 into first argument for function read
+	movq %rdi, %rsi   //move data_buf into second argument for function
+	movq $16, %rdx    //move 16 into third argument for function read	
 	movq $0, %rax
 
 	call read  //will return an int in %rax
 
-	addq $16, %rsp
+	addq $16, %rsp // same here, aren't you supposed to addq 10? especially bc we have not pushed onto stack here
 	popq %rbp
 	ret
+
 
 .globl hex_write_string
 hex_write_string:
 	//rdi has data_buf
-	pushq %rbp
-	subq $16, %rsp
-	movq %rsp, %rbp
-	pushq %rbx
-	pushq %r12
-	pushq %r13
+	pushq %rbp   		// push pbq
+	subq $16, %rsp		// A little unsure about the alignment, i dont think the total is mod 16 = 0!
+	movq %rsp, %rbp		// moved stack to rbp
+	pushq %rbx			// rbx = Index  subq 8, rsp
+	pushq %r12			// r12 = data_buf subq 8, rsp
+	pushq %r13			// r13 = char subq 8, rsp --> See 8 + 16 + 8 + 8 + 8 mod 16 = 3 not aligned?
 	movq $0, %rbx //Index
 	movq %rdi, %r12  //data_buf
 
 	.LWhileNotNullTerminator:
-		movq (%r12, %rbx, 1), %r13 //store r12[rbx] in r9
+		movq (%r12, %rbx, 1), %r13 //store r12[rbx] in r9 // wrong size for r13 -> char = 1 byte
 		cmpq $0x00, %r13 //if it is a null terminator
 		je .LExitLoop //exit the loop
 		movq $1, %rdi //otherwise set first term to be 1
 		movq $1, %rdx //set third term to be 1 as well
-		movq %r13, %rsi //set character
+		movq %r13, %rsi //set character // use smaller 
 		
 		call write
 		
-		incq %rbx
+		incq %rbx 	// incq rbx by 1 byte
 		jmp .LWhileNotNullTerminator
 	.LExitLoop:
 		popq %r13
