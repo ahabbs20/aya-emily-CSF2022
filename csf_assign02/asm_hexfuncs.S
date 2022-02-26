@@ -13,20 +13,20 @@
 .globl hex_read
 hex_read:
 	pushq %rbp
-	subq $16, % // i thought when you call a function, it's subq 8, not 16?
+	subq $8, %rsp // i thought when you call a function, it's subq 8, not 16?
 	movq %rsp, %rbp
 
 	//rdi has data_buf
 	//store return values in rax
 	//return read(0, data_buf, 16)
-	movq $0, %rdi     //move 0 into first argument for function read
 	movq %rdi, %rsi   //move data_buf into second argument for function
+	movq $0, %rdi //move 0 into first argument for function read (must come after the usage of rdi as data_buf)
 	movq $16, %rdx    //move 16 into third argument for function read	
 	movq $0, %rax
 
 	call read  //will return an int in %rax
 
-	addq $16, %rsp // same here, aren't you supposed to addq 10? especially bc we have not pushed onto stack here
+	addq $8, %rsp // same here, aren't you supposed to addq 10? especially bc we have not pushed onto stack here
 	popq %rbp
 	ret
 
@@ -44,12 +44,12 @@ hex_write_string:
 	movq %rdi, %r12  //data_buf
 
 	.LWhileNotNullTerminator:
-		movq (%r12, %rbx, 1), %r13 //store r12[rbx] in r9 // wrong size for r13 -> char = 1 byte
-		cmpq $0x00, %r13 //if it is a null terminator
+		movb (%r12, %rbx, 1), %r13b //store r12[rbx] in r9
+		cmpb $0x00, %r13b //if it is a null terminator
 		je .LExitLoop //exit the loop
 		movq $1, %rdi //otherwise set first term to be 1
 		movq $1, %rdx //set third term to be 1 as well
-		movq %r13, %rsi //set character // use smaller 
+		movb %r13b, %sil //set character
 		
 		call write
 		
@@ -59,7 +59,7 @@ hex_write_string:
 		popq %r13
 		popq %r12
 		popq %rbx
-		addq $16, %rsp
+		addq $16, %rsp //CHANGE THIS
 		popq %rbp
 		ret
 
