@@ -33,34 +33,29 @@ hex_read:
 
 .globl hex_write_string
 hex_write_string:
-	//rdi has data_buf
-	pushq %rbp   		// push pbq
-	subq $16, %rsp		// A little unsure about the alignment, i dont think the total is mod 16 = 0!
-	movq %rsp, %rbp		// moved stack to rbp
-	pushq %rbx			// rbx = Index  subq 8, rsp
-	pushq %r12			// r12 = data_buf subq 8, rsp
-	pushq %r13			// r13 = char subq 8, rsp --> See 8 + 16 + 8 + 8 + 8 mod 16 = 3 not aligned?
-	movq $0, %rbx //Index
-	movq %rdi, %r12  //data_buf
+	pushq %rbx							// rbx = Index  
+	pushq %r12							// r12 = data_buf 
+	pushq %r13							// r13 = char
+	movq $0, %rbx 						//Index
+	movq %rdi, %r12 					//data_buf
 
 	.LWhileNotNullTerminator:
-		movb (%r12, %rbx, 1), %r13b //store r12[rbx] in r9
-		cmpb $0x00, %r13b //if it is a null terminator
-		je .LExitLoop //exit the loop
-		movq $1, %rdi //otherwise set first term to be 1
-		movq $1, %rdx //set third term to be 1 as well
-		movb %r13b, %sil //set character
-		
+		movb (%r12, %rbx, 1), %r13b 	// store r12[rbx] in r9
+		cmpb $0x00, %r13b 				// if it is a null terminator
+		je .LExitLoop					// exit the loop
+
+		movq $1, %rdi 					// otherwise set first term to be 1
+		leaq (%r12, %rbx, 1), %rsi
+		//movq , %rsi		//set character
+		movq $1, %rdx					// set third term to be 1 as well
 		call write
 		
-		incq %rbx 	// incq rbx by 1 byte
+		incq %rbx 						// incq rbx by 1
 		jmp .LWhileNotNullTerminator
 	.LExitLoop:
 		popq %r13
 		popq %r12
 		popq %rbx
-		addq $16, %rsp //CHANGE THIS
-		popq %rbp
 		ret
 
 .globl hex_format_offset

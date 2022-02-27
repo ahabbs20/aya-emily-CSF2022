@@ -89,8 +89,8 @@ jmp .LWhileCondition				// jump to condition
 	call hex_write_string		// Call hex_write_string
 	movq $sSingleSpace, %rdi	// move single space into rdi
 	call hex_write_string		// call hex_write_string
-	incq %r15				// Incq counter
-	jmp .LForLoop					// jmp to toop of loop
+	incq %r15				    // Incq counter
+	jmp .LForLoop				// jmp to top of the loop
 
 .LRestOfWhile: 					// rest of while
 	movq $sSingleSpace, %rdi 	// move single space into rdi

@@ -3,11 +3,10 @@
    Aya Habbas - ahabbas1@jh.edu */
 
 #include "hexfuncs.h"  // this is the only header file which may be included!
+#include <unistd.h> 
 
 int main(void) {
   // TODO: implement the main function
-
-  // read
 
   char newLine[5] = "\n";
   char offset_colon[5] = ":";

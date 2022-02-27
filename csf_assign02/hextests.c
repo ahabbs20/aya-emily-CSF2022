@@ -39,6 +39,7 @@ void cleanup(TestObjs *objs) {
 }
 
 // Prototypes for test functions
+void testWrite1(TestObjs *objs);
 void testFormatOffset(TestObjs *objs);
 void testFormatByteAsHex(TestObjs *objs);
 void testHexToPrintable(TestObjs *objs);
@@ -49,7 +50,6 @@ int main(int argc, char **argv) {
   }
 
   TEST_INIT();
-
   TEST(testFormatOffset);
   TEST(testFormatByteAsHex);
   TEST(testHexToPrintable);
@@ -58,6 +58,7 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+
 
 void testFormatOffset(TestObjs *objs) {
   (void) objs; // suppress warning about unused parameter
