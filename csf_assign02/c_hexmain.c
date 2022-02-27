@@ -52,15 +52,4 @@ int main(void) {
     num_read_charas = hex_read(input);
   }
 
-
-
-
-  // while there is something to read
-    // read done
-    // format offset done
-    // print offset done
-    // print space after offset o
-    // print all characters:
-    // print text
-
 }
