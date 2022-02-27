@@ -28,14 +28,11 @@ movq $0, %r13					// move 0 into register r13
 pushq %r14						// push r14
 pushq %r15						// push r15 onto stack as counter
 
-subq $21, %rsp 					// align stack
-
 subq $5, %rsp					// align stack
 movq %rbp, %rdi					// move input (rbp) into rdi
 call hex_read					// call hex_read
 movq %rax, %r14					// move rax into r14
 		
-jmp .LWhileCondition				// jump to condition
 .LWhileCondition:				// condition
 	cmp $0, %r14				// cmp %r14 and 0
 	je .LRestOfFunction			// jmp to end of loop if == 0
@@ -108,13 +105,16 @@ jmp .LWhileCondition				// jump to condition
 	jmp .LWhileCondition		// jump to top of while
 
 .LRestOfFunction:				// end of while
-	addq $21, %rsp				
+	addq $5, %rsp				
 	popq %r15					// pop r15
 	popq %r14					// pop r14
 	popq %r13					// pop r13
 	popq %r12					// pop r12
+	addq $10, %rsp
 	popq %rbp					// pop rbp
+	addq $20, %rsp
 	popq %rbx					// pop rbx
+	addq $5, %rsp
 	addq $8, %rsp				// pop 8
 
 

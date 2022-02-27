@@ -7,7 +7,6 @@
 
 int main(void) {
   // TODO: implement the main function
-
   char newLine[5] = "\n";
   char offset_colon[5] = ":";
   char single_space[5] = " ";
@@ -49,6 +48,7 @@ int main(void) {
     hex_write_string(newLine);
 
     num_read_charas = hex_read(input);
+    
   }
-
+  
 }
