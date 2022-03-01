@@ -34,7 +34,7 @@ call hex_read					// call hex_read
 movq %rax, %r14					// move rax into r14
 		
 .LWhileCondition:				// condition
-	cmp $0, %r14				// cmp %r14 and 0
+	cmpq $0, %r14				// cmp %r14 and 0
 	je .LRestOfFunction			// jmp to end of loop if == 0
 	jmp .LWhileLoop				// jmp to loop content if not
 
@@ -55,24 +55,24 @@ movq %rax, %r14					// move rax into r14
 	call hex_write_string		// call hexwrite
 			
 	addq $16, %r13				// add 16 to offset
-	movq $0, %r15
-	jmp .LForLoop				// move 0 into r15 as counter
+	movq $0, %r15				// move 0 into r15 as counter
+	jmp .LForLoop				
 
 
 .LForLoop:						// top of for loop
-	cmp $16, %r15				// compare counter to 16 (r15 and r14)	
+	cmpq $16, %r15				// compare counter to 16 (r15 and r14)	
 	jge .LRestOfWhile			// jump if counter >= 16 to rest of while
 			
-	cmp %r14, %r15				// cmp counter to num_read_charas
+	cmpq %r14, %r15				// cmp counter to num_read_charas
 	jge .LElse					// jump if counter >= num_read_charas
 			
-	movq (%rbp, %r15, 1), %rdi	// move input(counter) into rdi
+	movb (%rbp, %r15, 1), %dil	// move input(counter) into rdi
 	movq %rbx, %rsi				// move byte_as_hex into rsi
 	call hex_format_byte_as_hex	// call hex_format_byte_as_hex
 			
-	movq (%rbp, %r15, 1), %rdi	// move input(counter) into rdi
+	movb (%rbp, %r15, 1), %dil	// move input(counter) into rdi
 	call hex_to_printable		// call hex_to_printable
-	movq %rax, (%rbp, %r15, 1) 	// move rax into input(counter)
+	movb %al, (%rbp, %r15, 1) 	// move rax into input(counter)
 	jmp .LRestOfFor				// jump to rest of loop
 
 .LElse:							// else
