@@ -104,7 +104,7 @@ hex_format_byte_as_hex:
 		movb %r8b, %dl                                	 // copy num into temp
 		andb $0xf, %dl                               	 // mask byte val with 0xf
 		cmpb $9, %dl                                  	 // compare temp to 9 (if statement)
-		jg .LByteIfSecondBranch                             	 // jump to next comparison if temp > 9
+		jg .LByteSecondBranch                             	 // jump to next comparison if temp > 9
 		addb $48L, %dl                                   // add temp and 48L
 		movb %dl, (%rsi, %rcx, 1)               	 // move temp to sbuf[index]
 		decq %rcx                                        // decrement index
