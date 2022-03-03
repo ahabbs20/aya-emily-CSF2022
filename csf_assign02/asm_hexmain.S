@@ -1,3 +1,9 @@
+/*
+Partners:
+Emily Berger - eberge11@jh.edu
+Aya Habbas - ahabbas1@jh.edu
+*/
+
 /* Hexdump main function, assembly language version */
 	.section .rodata
 	sNewLine: .string "\n"
@@ -8,7 +14,6 @@
 
 	.globl main
 main:
-	/* TODO: add your code here */
 subq $8, %rsp					// align stack		
 subq $5, %rsp					// allocate memory for byte as hex
 pushq %rbx						// push %rbx
@@ -29,11 +34,12 @@ pushq %r14						// push r14
 pushq %r15						// push r15 onto stack as counter
 
 subq $5, %rsp					// align stack
-movq %rbp, %rdi					// move input (rbp) into rdi
-call hex_read					// call hex_read
-movq %rax, %r14					// move rax into r14
 		
 .LWhileCondition:				// condition
+	movq %rbp, %rdi 			// move input into rdi
+	call hex_read				// call hex_read
+	movq %rax, %r14				// move rax into r14
+
 	cmpq $0, %r14				// cmp %r14 and 0
 	je .LRestOfFunction			// jmp to end of loop if == 0
 	jmp .LWhileLoop				// jmp to loop content if not
@@ -99,9 +105,6 @@ movq %rax, %r14					// move rax into r14
 	movq $sNewLine, %rdi 		// move newline into rdi
 	call hex_write_string		// call hex write
 
-	movq %rbp, %rdi 			// move input into rdi
-	call hex_read				// call hex_read
-	movq %rax, %r14				// move rax into r14
 	jmp .LWhileCondition		// jump to top of while
 
 .LRestOfFunction:				// end of while
