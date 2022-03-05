@@ -1,54 +1,73 @@
-// C implementation of hexdump main function
+// Main Cache function
 /* Emily Berger - eberge11@jh.edu
    Aya Habbas - ahabbas1@jh.edu */
 
-#include "hexfuncs.h"  // this is the only header file which may be included!
-#include <unistd.h> 
+/*
+   isPowerOfTwo Code:
+      https://stackoverflow.com/questions/57025836/how-to-check-if-a-given-number-is-a-power-of-two
 
-int main(void) {
-  // TODO: implement the main function
-  char newLine[5] = "\n";
-  char offset_colon[5] = ":";
-  char single_space[5] = " ";
-  char byte_as_hex[5];
-  char input[20];
-  
-  char offset_string[10];
-  unsigned int offset = 0;
-  int num_read_charas = hex_read(input);
-  
-  while (num_read_charas != 0) {
-    input[num_read_charas] = '\0';
-    // format/print offset
-    hex_format_offset(offset, offset_string);
-    hex_write_string(offset_string);
-    hex_write_string(offset_colon);
-    hex_write_string(single_space);
-    offset += 16;
+*/
 
-    int counter = 0;
-    // format/print hexdump
-    for (int i = 0; i < 16; i++) {
-      if (counter < num_read_charas) {
-        hex_format_byte_as_hex(input[counter], byte_as_hex);
-        input[counter] = hex_to_printable(input[counter]);
-      } else {
-        byte_as_hex[0] = ' ';
-        byte_as_hex[1] = ' ';
-        byte_as_hex[2] = '\0';
-      }
+#include <iostream>
 
-      hex_write_string(byte_as_hex);
-      hex_write_string(single_space);
-      counter++;
-    }
+using namespace std;
 
-    hex_write_string(single_space);
-    hex_write_string(input);
-    hex_write_string(newLine);
+bool isPowerOfTwo(int num) {
+   return ((num & (num - 1)) == 0) && (num != 0);
+}
 
-    num_read_charas = hex_read(input);
-    
-  }
-  
+int main(int argc, char *argv[]) {
+   // number of sets in the cache
+   // number of blocks in each set
+   // number of bytes in each block
+   // write-allocate or no-write allocate
+   // write through or write back
+   // lru or fifo
+
+   int numSets = atoi(argv[1]);
+   int numBlocks = atoi(argv[2]);
+   int blockSize = atoi(argv[3]);
+   bool writeBack = false;
+   bool writeAllocate = false;
+
+   if (argc < 6) {
+      cerr << "Error: Have not passed minimum number of arguments\n";
+      return -1;
+   }
+
+
+   if (!isPowerOfTwo(numSets)) {
+      cerr << "Error: Number of sets must be power of two.\n";
+      return -1;
+   }
+
+   if (blockSize < 4) {
+      cerr << "Error: block size is less than 4.\n";
+      return -1;
+   } else if (!isPowerOfTwo(blockSize)) {
+      cerr << "Error: block size must be power of 2.\n";
+      return -1;
+   }
+
+   string result = argv[4];
+   if (result.compare("write-allocate") == 0) {
+      writeAllocate = true;
+   } else if (result.compare("no-write-allocate") == 0) {
+      writeAllocate = false;
+   } else {
+      cerr << "Error: (no-)write-allocate unspecified.\n";
+      return -1;
+   }
+
+   result = argv[5];
+   if (result.compare("write-through") == 0) {
+      writeBack = false;
+   } else if (result.compare("write-back") == 0) {
+      writeBack = true;
+   } else {
+      cerr << "Error: write-back/write-through unspecified\n";
+      return -1;
+   }
+
+   return 0;
 }
