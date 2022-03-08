@@ -31,7 +31,9 @@ cache_funcs.o: cache_func.cpp
 .PHONY: solution.zip 
 solution.zip :
 	rm -f solution.zip
-	zip -9r $@ Makefile README.txt *.h *.cpp *.c *.S
+<<<<<<< HEAD
+	zip -9r $@ Makefile README.txt *.h *.c *.cpp *.S
+>>>>>>> 8670b60325321c868331520dc9cfe837e02d284f
 
 clean :
 	rm -f *.o a.out cache_main cache_tests depend.mak solution.zip
