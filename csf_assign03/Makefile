@@ -26,7 +26,13 @@ cache_main.o: cache_main.cpp
 .PHONY: solution.zip 
 solution.zip :
 	rm -f solution.zip
+<<<<<<< HEAD
 	zip -9r $@ Makefile README.txt *.h *.cpp
+=======
+<<<<<<< HEAD
+	zip -9r $@ Makefile README.txt *.h *.c *.cpp *.S
+>>>>>>> 8670b60325321c868331520dc9cfe837e02d284f
+>>>>>>> 6a6374568d4d1431a9e1a6e65bdd717c5f42d782
 
 clean :
 	rm -f *.o a.out csim depend.mak solution.zip
