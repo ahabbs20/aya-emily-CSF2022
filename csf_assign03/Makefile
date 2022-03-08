@@ -16,25 +16,20 @@ all : csim #cache_tests
 
 #csim_tests : cache_funcs.o csim_tests.o tctest.o g++ -o csim_tests cache_funcs.o csim_tests.o tctest.o
 
-csim : cache_funcs.o cache_main.o
-	g++ -o csim cache_funcs.o cache_main.o
+csim : cache_main.o
+	g++ -o csim cache_main.o
 
 cache_main.o: cache_main.cpp
 	g++ $(CFLAGS) -c -o cache_main.o cache_main.cpp
 
-cache_funcs.o: cache_func.cpp	
-	g++ $(CLFAGS) -c -o cache_funcs.o cache_func.cpp
-
-#csim_tests.o: cache_tests.cpp tctest.h g++ $(CFLAGS) -c -o csim_tests.o cache_tests.cpp
-	
 # Use this target to create a zipfile that you can submit to Gradescope
 .PHONY: solution.zip 
 solution.zip :
 	rm -f solution.zip
-	zip -9r $@ Makefile README.txt *.h *.c *.cpp *.S
+	zip -9r $@ Makefile README.txt *.h *.cpp
 
 clean :
-	rm -f *.o a.out cache_main cache_tests depend.mak solution.zip
+	rm -f *.o a.out csim depend.mak solution.zip
 
 depend.mak :
 	touch $@
