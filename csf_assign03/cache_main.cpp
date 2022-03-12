@@ -51,8 +51,20 @@ class Slot {
          dirty = true;
       }
       
+      unsigned int get_tag() {
+         return tag;
+      }
 
-   private:
+      bool operator ==(Slot second) {
+         /*
+            Have to define equality but also think about it- we do some 
+            comparisons to NULL and how would that need to work
+         */
+         if (tag == second.get_tag()) {
+            return true;
+         }
+         return false;
+      }
       
 };
 
@@ -94,10 +106,10 @@ class Cache {
          block_size = 0;
       };
       
-      //Probably main constructor --> !!!!!!! Why are we passing bool pointers? We can just pass bools...
+      //Probably main constructor --> !!!!!!! Why are we passing bool pointers? We can just pass bools... pointers were because we didnt' want to refactor validate
+      //and it needed to set stuff that will be also used in main
       Cache(int num_s, int num_b, int block_s, bool * write_a, bool * write_th, bool * lru): 
          num_sets(num_s), num_blocks(num_b), block_size(block_s), write_allocate(*write_a), write_through(*write_th), lru(*lru) {
-           //Add vector in vectors here lmao
            bits_in_offset = log_2(block_size, 0);
            bits_in_index = log_2(num_blocks, 0);
            bits_in_tag = 64 - bits_in_offset - bits_in_index;
@@ -138,8 +150,9 @@ class Cache {
       void load(unsigned int tag, unsigned int index) {
          
          // Deadass struggling to define this function...
-         Slot found = *(find(cache[index]));
-         if (found == NULL)  {
+         Slot found = find(cache[index].set, tag); //*(find(cache[index]));
+         Slot blank = Slot();
+         if (found == blank)  {
             vector<Slot> target_set = cache[index].set;
 
             if (target_set.size() < cache[index].max_slots) {
@@ -186,8 +199,36 @@ class Cache {
          set.erase(lowest);
       }
 
+      Slot find(vector<Slot> set, unsigned int tag) {
+         if (set.size() == 1) {             //not sure if this is necessary
+            return set[0];
+         }
+
+         Slot target = Slot();
+         for (vector<Slot>::iterator it = set.begin(); it != set.end(); it++) {
+            if ((*it).get_tag() == tag) {
+               target = (*it);
+            }
+         }
+         return target;
+      }
+
 
       void store(unsigned int tag, unsigned int index) {
+         Slot found = (find(cache[index].set, tag));
+         Slot blank = Slot();
+         //TODO: DEFINE SLOT EQUALITY SOMEWHERE
+         if (found == blank) {
+            if (*write_allocate) {
+               load(tag, index);
+            }
+         } else {
+            if (!*write_through) {
+               found.set_dirty();
+            } else {
+
+            }
+         }
          /*
             if (hit) {
                if (write back)
@@ -215,8 +256,8 @@ class Cache {
       int num_sets;
       int num_blocks;
       int block_size;
-      bool write_allocate;
-      bool write_through;
+      bool *write_allocate;
+      bool *write_through;
       bool lru;
       vector<Set> cache;
 
