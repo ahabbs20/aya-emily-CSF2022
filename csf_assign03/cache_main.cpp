@@ -43,7 +43,7 @@ class Slot {
          return load_ts;
       }
 
-      unsigned int get_access_Time () {
+      unsigned int get_Access_Time () {
          return access_ts;
       }
       
@@ -94,9 +94,9 @@ class Cache {
          block_size = 0;
       };
       
-      //Probably main constructor
-      Cache(int num_s, int num_b, int block_s, bool * write_a, bool * write_th): 
-         num_sets(num_s), num_blocks(num_b), block_size(block_s), write_allocate(*write_a), write_through(*write_th) {
+      //Probably main constructor --> !!!!!!! Why are we passing bool pointers? We can just pass bools...
+      Cache(int num_s, int num_b, int block_s, bool * write_a, bool * write_th, bool * lru): 
+         num_sets(num_s), num_blocks(num_b), block_size(block_s), write_allocate(*write_a), write_through(*write_th), lru(*lru) {
            //Add vector in vectors here lmao
            bits_in_offset = log_2(block_size, 0);
            bits_in_index = log_2(num_blocks, 0);
@@ -136,42 +136,58 @@ class Cache {
 
       
       void load(unsigned int tag, unsigned int index) {
-         /*
-          go to index, look for slot
-          if slot is found, do nothing
-          if slot if not found;
-            if (number of valid blocks in the set != max number of possible blocks) {
-             add it
+         
+         // Deadass struggling to define this function...
+         Slot found = *(find(cache[index]));
+         if (found == NULL)  {
+            vector<Slot> target_set = cache[index].set;
+
+            if (target_set.size() < cache[index].max_slots) {
+               target_set.push_back(Slot(tag, load_counter, access_counter));
             } else {
-               // if (LRU) {
-                  remove_lru()
-                  add it
+               if (lru) {
+                  lru_remove(target_set);
+                  target_set.push_back(Slot(tag, load_counter, access_counter));
+                  load_counter++;
                } else {
-                  remove_fifo
-                  add it
+                  fifo_remove(target_set);
+                  target_set.push_back(Slot(tag, load_counter, access_counter));
+                  load_counter++;
                }
+
             }
-         */
+
+
+         }
+
       }
 
-      /*
-         remove lru
-            set lru = first slot
-            iterate thru
-               if strictly less than, replace lru
-            delete lru 
+      void lru_remove(vector<Slot> set) {
+         vector<Slot>::iterator lowest = set.begin();
+
+         for (vector<Slot>::iterator it = set.begin(); it != set.end(); it++) {
+            if ((*it).get_Access_Time() < (*lowest).get_Access_Time()) {
+               lowest = it;
+            }
+         }
+
+         set.erase(lowest);
+      }
+
+      void fifo_remove(vector<Slot> set) {
+         vector<Slot>::iterator lowest = set.begin();
+
+         for (vector<Slot>::iterator it = set.begin(); it != set.end(); it++) {
+            if ((*it).get_Load_Time() < (*lowest).get_Load_Time()) {
+               lowest = it;
+            }
+         }
+
+         set.erase(lowest);
+      }
 
 
-         remove fifo
-            set first in = first slot
-            iterate thru
-               if strictly less than, replace first in
-            delete first in
-
-      */
-
-
-      void write(unsigned int tag, unsigned int index) {
+      void store(unsigned int tag, unsigned int index) {
          /*
             if (hit) {
                if (write back)
@@ -186,24 +202,7 @@ class Cache {
          */
       }
 
-   private:
-      int num_sets;
-      int num_blocks;
-      int block_size;
-      bool write_allocate;
-      bool write_through;
-      vector<Set> cache;
-
-      int load_hit_count = 0;
-      int load_miss_count = 0;
-      int store_hit_count = 0;
-      int store_miss_count = 0;
-      int total_cycle = 0;      
-
-      unsigned int bits_in_offset = 0;
-      unsigned int bits_in_index = 0;
-      unsigned int bits_in_tag = 0;
-
+      
       int log_2(int num, int result) {
          while (num != 1) {
             num = num >> 1;
@@ -212,12 +211,36 @@ class Cache {
          return result;
       }
 
+   private:
+      int num_sets;
+      int num_blocks;
+      int block_size;
+      bool write_allocate;
+      bool write_through;
+      bool lru;
+      vector<Set> cache;
+
+      int load_hit_count = 0;
+      int load_miss_count = 0;
+      int store_hit_count = 0;
+      int store_miss_count = 0;
+      int total_cycle = 0; 
+
+      int load_counter;
+      int access_counter;     
+
+      unsigned int bits_in_offset = 0;
+      unsigned int bits_in_index = 0;
+      unsigned int bits_in_tag = 0;
+
 };
+
 bool isPowerOfTwo(int num) {
    return ((num & (num - 1)) == 0) && (num != 0);
 }
 
-string validate(int argc, int num_sets, int num_blocks, int block_size, bool *writeBack, bool *writeAllocate, string result1, string result2); 
+string validate(int argc, char * argv[],  int num_sets, int num_blocks, int block_size, bool *writeBack,  
+               bool *writeAllocate, bool *lru, string check_write_allocate, string check_write_back); 
 
 int main(int argc, char *argv[]) {
    int numSets = atoi(argv[1]);
@@ -225,17 +248,18 @@ int main(int argc, char *argv[]) {
    int blockSize = atoi(argv[3]);
    bool writeBack = false;
    bool writeAllocate = false;
-   string result1 = argv[4];
-   string result2 = argv[5];
+   bool lru = false;
+   string check_write_allocate = argv[4];
+   string check_write_back = argv[5];
 
-   string message = validate(argc, numSets, numBlocks, blockSize, &writeBack, &writeAllocate, result1, result2);
+   string message = validate(argc, argv, numSets, numBlocks, blockSize, &writeBack, &writeAllocate, &lru, check_write_allocate, check_write_back);
    if (message.length() != 0) {
       cerr << message;
       return -1;
    }
 
 
-   Cache cache = Cache(numSets, numBlocks, blockSize, &writeAllocate, &writeBack);
+   Cache cache = Cache(numSets, numBlocks, blockSize, &writeAllocate, &writeBack, &lru);
 
    char  op;
    char * adrs;
@@ -253,12 +277,12 @@ int main(int argc, char *argv[]) {
       index = cache.decode_index(address);
 
       cout << tag << " " << index << "\n";
-      /*
+      
       if (op == 'l') {
          cache.load(tag, index);
       } else {
          cache.store(tag, index);
-      }*/
+      }
 
       
    }
@@ -271,7 +295,8 @@ int main(int argc, char *argv[]) {
    return 0;
 }
 
-string validate(int argc, int num_sets, int num_blocks, int block_size, bool *writeBack, bool *writeAllocate, string result1, string result2) {
+string validate(int argc, char * argv[], int num_sets, int num_blocks, int block_size, bool *writeBack, 
+               bool *writeAllocate, bool *lru, string check_write_allocate, string check_write_back) {
    if (argc < 6) {
       return "Error: Have not passed minimum number of arguments\n";
    }
@@ -290,25 +315,41 @@ string validate(int argc, int num_sets, int num_blocks, int block_size, bool *wr
       return "Error: block size must be power of 2.\n";
    }
 
-   if (result1.compare("write-allocate") == 0) {
+   if (check_write_allocate.compare("write-allocate") == 0) {
       *writeAllocate = true; //come back to it
-   } else if (result2.compare("no-write-allocate") == 0) {
+   } else if (check_write_back.compare("no-write-allocate") == 0) {
       *writeAllocate = false; //come back to it
    } else {
       return "Error: (no-)write-allocate unspecified.\n";
    }
 
-   if (result2.compare("write-through") == 0) {
+   if (check_write_back.compare("write-through") == 0) {
       *writeBack = false; //come back to this
-   } else if (result2.compare("write-back") == 0) {
+   } else if (check_write_back.compare("write-back") == 0) {
       *writeBack = true; //come back to this
    } else {
       return "Error: write-back/write-through unspecified\n";
    }
 
+   if (argc == 7) {
+      string lru_string = (string) argv[6];
+      if (lru_string.compare("lru") == 0) {
+         *lru = true;
+      } else if (lru_string.compare("fifo") == 0) {
+         *lru = false;
+      } else {
+         return "Error: Unable to parse parameter.";
+      }
+
+   } else {
+      *lru = false;
+   }
+
    if (!writeAllocate && writeBack) { //come back to this too
       return "Error: Cannot have no_write_allocate and write_back\n";
    }
+
+
 
    return "";
 } 
