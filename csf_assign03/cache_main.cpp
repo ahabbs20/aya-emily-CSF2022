@@ -24,7 +24,6 @@ class Slot {
       bool valid;
       bool dirty;
 
-
    public: 
       Slot() {
          tag = 0;
@@ -32,7 +31,6 @@ class Slot {
          access_ts = 0;
          valid = false;
          dirty = false;
-
       }
 
       Slot(unsigned int tag, unsigned int load_ts, unsigned int access_ts): tag(tag), load_ts(load_ts), access_ts(access_ts) {
@@ -67,29 +65,18 @@ class Slot {
          return valid;
       }
 
-      bool operator ==(Slot second) {
-         /*
-            Have to define equality but also think about it- we do some 
-            comparisons to NULL and how would that need to work
-         */
+      /*bool operator ==(Slot second) {
          return tag == second.get_tag();
-      }
-      
+      }*/
 };
 
 class Set {
-   
-
    public:
       Set() {
-          /*
-         vector<Slot> temp(0);
-         set = temp;
-         */
+
       }
 
-
-      Set(int size) : set(size){ 
+      Set(int size) : set(size) { 
          vector<Slot> temp(size);
          set = temp;
       }
@@ -114,28 +101,23 @@ class Cache {
          block_size = 0;
       };
       
-      //Probably main constructor --> !!!!!!! Why are we passing bool pointers? We can just pass bools... pointers were because we didnt' want to refactor validate
-      //and it needed to set stuff that will be also used in main
-      Cache(int num_s, int num_b, int block_s, bool * write_a, bool * write_th, bool * lru): 
+      Cache(int num_s, int num_b, int block_s, bool write_a, bool write_th, bool * lru): 
          num_sets(num_s), num_blocks(num_b), block_size(block_s), write_allocate(write_a), write_through(write_th), lru(*lru) {
-           bits_in_offset = log_2(block_size, 0);
-           bits_in_index = log_2(num_blocks, 0);
-           bits_in_tag = 64 - bits_in_offset - bits_in_index;
-           vector<Set> temp(num_s);
-           cache = temp;
-         };
+         bits_in_offset = log_2(block_size, 0);
+         if (num_sets != 1) {
+            bits_in_index = log_2(num_blocks, 0);
+         }
+         bits_in_tag = 64 - bits_in_offset - bits_in_index;
+         vector<Set> temp(num_s);
+         cache = temp;
+      };
          
-      
-      //you have number of sets (num_sets)
-      //number of blocks (num_blocks)
-      //block size (block_size)
 
-      //tag index offset
       unsigned int decode_tag(unsigned int address) {
-         //shift out offset bits
          if (bits_in_offset + bits_in_index == 64) { // undefined behaviour, must be edge case
             return 0;
          }
+
          address = address >> (bits_in_offset + bits_in_index);
 
          return address;
@@ -155,31 +137,29 @@ class Cache {
 
       void load_miss(unsigned int tag, unsigned int index) {
          creation_timestamp++;
-         if (cache[index].set.size() < num_blocks) {
-            cache[index].set.push_back(Slot(tag, creation_timestamp, store_counter));
-         } else {
+         if (cache[index].set.size() >= num_blocks) {
             if (lru) {
                lru_remove(index);
-               cache[index].set.push_back(Slot(tag, creation_timestamp, store_counter));
             } else {
                fifo_remove(index);
-               cache[index].set.push_back(Slot(tag, creation_timestamp, store_counter));
             }
-
-         }
+         }         
+         
+         cache[index].set.push_back(Slot(tag, creation_timestamp, store_counter));
+         cache[index].set.back().set_Access_Time(access_timestamp);
       }
 
-      
       void load(unsigned int tag, unsigned int index) {
          load_counter++;
-         // Deadass struggling to define this function...
-         Slot found = find(index, tag); 
-         if (!found.get_valid())  {
-            //vector<Slot> target_set = cache[index].set;
+         access_timestamp++;
+         int found = find(index, tag); 
+         
+         if (found == -1)  {
             load_miss_count++;
             load_miss(tag, index);
          } else {
             load_hit_count++;
+            cache[index].set[found].set_Access_Time(access_timestamp);
          }
       }
 
@@ -187,7 +167,7 @@ class Cache {
          vector<Slot>::iterator lowest = cache[index].set.begin();
 
          for (vector<Slot>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); it++) {
-            if ((*it).get_Access_Time() < (*lowest).get_Access_Time()) {
+            if ((*it).get_Access_Time() <= (*lowest).get_Access_Time()) {
                lowest = it;
             }
          }
@@ -203,46 +183,43 @@ class Cache {
                lowest = it;
             }
          }
-
+         
          cache[index].set.erase(lowest);
       }
 
-      /**/
-      Slot find(int index, unsigned int tag) {
+      int find(int index, unsigned int tag) {
          vector<Slot> set = cache[index].set;
-         Slot target = Slot();
+         
          for (vector<Slot>::iterator it = set.begin(); it != set.end(); it++) {
             if ((*it).get_tag() == tag) {
-               return (*it);
+               return it - set.begin();
             }
-            
          }
-         return target;
+
+         return -1;
       }
-
-
 
       void store(unsigned int tag, unsigned int index) {
          store_counter++;
-         Slot found = find(index, tag);
-         
-         if (!found.get_valid()) {
+         access_timestamp++;
+         int found = find(index, tag);
+               
+         if (found == -1) {
             store_miss_count++;
-            if (*write_allocate) {
+            if (write_allocate) {
                load_miss(tag, index);
-               cache[index].set.back().set_Access_Time(access_timestamp++);
+               cache[index].set.back().set_Access_Time(access_timestamp);
             }
          } else {
             store_hit_count++;
-            found.inc_Access_Time();
-            if (!*write_through) {
-               found.set_dirty();
+            cache[index].set[found].set_Access_Time(access_timestamp);
+            if (!write_through) {
+               cache[index].set[found].set_dirty();
             }
          }
 
       }
 
-      
       int log_2(int num, int result) {
          while (num != 1) {
             num = num >> 1;
@@ -254,20 +231,17 @@ class Cache {
    private:
       unsigned int num_sets;
       unsigned int num_blocks;
-      int block_size;
-      bool *write_allocate;
-      bool *write_through;
+      unsigned int block_size;
+      bool write_allocate;
+      bool write_through;
       bool lru;
       vector<Set> cache;
       unsigned int creation_timestamp = 0;
       unsigned int access_timestamp = 0;
 
-         
-
       unsigned int bits_in_offset = 0;
       unsigned int bits_in_index = 0;
       unsigned int bits_in_tag = 0;
-
 };
 
 bool isPowerOfTwo(int num) {
@@ -278,56 +252,44 @@ string validate(int argc, char * argv[],  int num_sets, int num_blocks, int bloc
                bool *writeAllocate, bool *lru, string check_write_allocate, string check_write_back); 
 
 int main(int argc, char *argv[]) {
-   int numSets = atoi(argv[1]);
-   int numBlocks = atoi(argv[2]);
-   int blockSize = atoi(argv[3]);
+   unsigned int numSets = atoi(argv[1]);
+   unsigned int numBlocks = atoi(argv[2]);
+   unsigned int blockSize = atoi(argv[3]);
+   string check_write_allocate = argv[4];
+   string check_write_back = argv[5];
    bool writeBack = false;
    bool writeAllocate = false;
    bool lru = false;
-   string check_write_allocate = argv[4];
-   string check_write_back = argv[5];
-
+   
    string message = validate(argc, argv, numSets, numBlocks, blockSize, &writeBack, &writeAllocate, &lru, check_write_allocate, check_write_back);
    
-   if (message.length() != 0) {
+   if (message.compare("") != 0) {
       cerr << message;
       return -1;
    }
 
-   // CHANGE 
-   Cache cache = Cache(numSets, numBlocks, blockSize, &writeAllocate, &writeBack, &lru);
+   Cache cache = Cache(numSets, numBlocks, blockSize, writeAllocate, writeBack, &lru);
 
    char op;
-   string tempAddress; // to properly read in from cin
-    // to use stroul
+   string tempAddress; 
    string theRest;
 
    unsigned int tag;
    unsigned int index;
    unsigned int address;
-   int load_counter = 0;
-   int store_counter = 0;
-   int counter = 0;
-
-   while (cin >> op >> tempAddress >> theRest/*cin.peek() != EOF*/) {
-      
+   
+   while (cin >> op >> tempAddress >> theRest) {
       cin.clear();
-      counter++;
       const char* adrs = tempAddress.c_str();
       address = strtoul(adrs, NULL, 16);
       tag = cache.decode_tag(address);
       index = cache.decode_index(address);
-      // cout << tempAddress << endl;
       if (op == 'l') {
-         load_counter++;
          cache.load(tag, index);
       } else if (op == 's') {
-         store_counter++;
          cache.store(tag, index);
       }
    }
-
-   cout << counter << " " << load_counter << " " << store_counter << endl;
 
    cout << "Total loads: " << cache.load_counter << endl;
    cout << "Total stores: " << cache.store_counter << endl;
@@ -384,7 +346,6 @@ string validate(int argc, char * argv[], int num_sets, int num_blocks, int block
       } else {
          return "Error: Unable to parse parameter.";
       }
-
    } else {
       *lru = false;
    }
@@ -396,4 +357,4 @@ string validate(int argc, char * argv[], int num_sets, int num_blocks, int block
 
 
    return "";
-} 
+}
