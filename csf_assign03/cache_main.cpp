@@ -47,6 +47,14 @@ class Slot {
          return access_ts;
       }
       
+      void inc_Access_Time(){
+         access_ts++;
+      }
+
+      void set_Access_Time(unsigned int new_Access_Time) {
+         access_ts = new_Access_Time;
+      }
+      
       void set_dirty() {
          dirty = true;
       }
@@ -55,15 +63,16 @@ class Slot {
          return tag;
       }
 
+      bool get_valid() {
+         return valid;
+      }
+
       bool operator ==(Slot second) {
          /*
             Have to define equality but also think about it- we do some 
             comparisons to NULL and how would that need to work
          */
-         if (tag == second.get_tag()) {
-            return true;
-         }
-         return false;
+         return tag == second.get_tag();
       }
       
 };
@@ -72,33 +81,32 @@ class Set {
    
 
    public:
+      Set() {
+          /*
+         vector<Slot> temp(0);
+         set = temp;
+         */
+      }
 
-      Set(int size, int m_slots) : max_slots(m_slots), set(size){ 
+
+      Set(int size) : set(size){ 
          vector<Slot> temp(size);
          set = temp;
-
       }
-      
-      int max_slots;
+
       vector<Slot> set;
 };
 
 class Cache {
-   /* TODO:
-      EMILY!!!! LOOK OVER HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-      Emily's Tasks: 
-         - store
-         - find
-
-      Aya's Tasks: 
-         - Load
-         - evict_Lru
-         - evict_Fifo
-
-   */
-
    public:
+      unsigned int load_counter = 0;
+      unsigned int store_counter = 0;  
+      unsigned int load_hit_count = 0;
+      unsigned int load_miss_count = 0;
+      unsigned int store_hit_count = 0;
+      unsigned int store_miss_count = 0;
+      unsigned int total_cycle = 0; 
+
       //Default constructor
       Cache() {
          num_sets = 0;
@@ -109,11 +117,10 @@ class Cache {
       //Probably main constructor --> !!!!!!! Why are we passing bool pointers? We can just pass bools... pointers were because we didnt' want to refactor validate
       //and it needed to set stuff that will be also used in main
       Cache(int num_s, int num_b, int block_s, bool * write_a, bool * write_th, bool * lru): 
-         num_sets(num_s), num_blocks(num_b), block_size(block_s), write_allocate(*write_a), write_through(*write_th), lru(*lru) {
+         num_sets(num_s), num_blocks(num_b), block_size(block_s), write_allocate(write_a), write_through(write_th), lru(*lru) {
            bits_in_offset = log_2(block_size, 0);
            bits_in_index = log_2(num_blocks, 0);
            bits_in_tag = 64 - bits_in_offset - bits_in_index;
-
            vector<Set> temp(num_s);
            cache = temp;
          };
@@ -140,107 +147,99 @@ class Cache {
          }
 
          address = address >> bits_in_offset;
-         address = address << bits_in_offset + bits_in_tag;
-         address = address >> bits_in_offset + bits_in_tag;
+         address = address << (bits_in_offset + bits_in_tag);
+         address = address >> (bits_in_offset + bits_in_tag);
 
          return address;
       }
 
-      
-      void load(unsigned int tag, unsigned int index) {
-         
-         // Deadass struggling to define this function...
-         Slot found = find(cache[index].set, tag); //*(find(cache[index]));
-         Slot blank = Slot();
-         if (found == blank)  {
-            vector<Slot> target_set = cache[index].set;
-
-            if (target_set.size() < cache[index].max_slots) {
-               target_set.push_back(Slot(tag, load_counter, access_counter));
+      void load_miss(unsigned int tag, unsigned int index) {
+         creation_timestamp++;
+         if (cache[index].set.size() < num_blocks) {
+            cache[index].set.push_back(Slot(tag, creation_timestamp, store_counter));
+         } else {
+            if (lru) {
+               lru_remove(index);
+               cache[index].set.push_back(Slot(tag, creation_timestamp, store_counter));
             } else {
-               if (lru) {
-                  lru_remove(target_set);
-                  target_set.push_back(Slot(tag, load_counter, access_counter));
-                  load_counter++;
-               } else {
-                  fifo_remove(target_set);
-                  target_set.push_back(Slot(tag, load_counter, access_counter));
-                  load_counter++;
-               }
-
+               fifo_remove(index);
+               cache[index].set.push_back(Slot(tag, creation_timestamp, store_counter));
             }
 
-
          }
-
       }
 
-      void lru_remove(vector<Slot> set) {
-         vector<Slot>::iterator lowest = set.begin();
+      
+      void load(unsigned int tag, unsigned int index) {
+         load_counter++;
+         // Deadass struggling to define this function...
+         Slot found = find(index, tag); 
+         if (!found.get_valid())  {
+            //vector<Slot> target_set = cache[index].set;
+            load_miss_count++;
+            load_miss(tag, index);
+         } else {
+            load_hit_count++;
+         }
+      }
 
-         for (vector<Slot>::iterator it = set.begin(); it != set.end(); it++) {
+      void lru_remove(int index) {
+         vector<Slot>::iterator lowest = cache[index].set.begin();
+
+         for (vector<Slot>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); it++) {
             if ((*it).get_Access_Time() < (*lowest).get_Access_Time()) {
                lowest = it;
             }
          }
 
-         set.erase(lowest);
+         cache[index].set.erase(lowest);
       }
 
-      void fifo_remove(vector<Slot> set) {
-         vector<Slot>::iterator lowest = set.begin();
+      void fifo_remove(int index) {
+         vector<Slot>::iterator lowest = cache[index].set.begin();
 
-         for (vector<Slot>::iterator it = set.begin(); it != set.end(); it++) {
+         for (vector<Slot>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); it++) {
             if ((*it).get_Load_Time() < (*lowest).get_Load_Time()) {
                lowest = it;
             }
          }
 
-         set.erase(lowest);
+         cache[index].set.erase(lowest);
       }
 
-      Slot find(vector<Slot> set, unsigned int tag) {
-         if (set.size() == 1) {             //not sure if this is necessary
-            return set[0];
-         }
-
+      /**/
+      Slot find(int index, unsigned int tag) {
+         vector<Slot> set = cache[index].set;
          Slot target = Slot();
          for (vector<Slot>::iterator it = set.begin(); it != set.end(); it++) {
             if ((*it).get_tag() == tag) {
-               target = (*it);
+               return (*it);
             }
+            
          }
          return target;
       }
 
 
+
       void store(unsigned int tag, unsigned int index) {
-         Slot found = (find(cache[index].set, tag));
-         Slot blank = Slot();
-         //TODO: DEFINE SLOT EQUALITY SOMEWHERE
-         if (found == blank) {
+         store_counter++;
+         Slot found = find(index, tag);
+         
+         if (!found.get_valid()) {
+            store_miss_count++;
             if (*write_allocate) {
-               load(tag, index);
+               load_miss(tag, index);
+               cache[index].set.back().set_Access_Time(access_timestamp++);
             }
          } else {
+            store_hit_count++;
+            found.inc_Access_Time();
             if (!*write_through) {
                found.set_dirty();
-            } else {
-
             }
          }
-         /*
-            if (hit) {
-               if (write back)
-                  mark dirty
-            else 
-               if write-allocate
-                  load()
-               else {}
-            }
 
-
-         */
       }
 
       
@@ -253,22 +252,17 @@ class Cache {
       }
 
    private:
-      int num_sets;
-      int num_blocks;
+      unsigned int num_sets;
+      unsigned int num_blocks;
       int block_size;
       bool *write_allocate;
       bool *write_through;
       bool lru;
       vector<Set> cache;
+      unsigned int creation_timestamp = 0;
+      unsigned int access_timestamp = 0;
 
-      int load_hit_count = 0;
-      int load_miss_count = 0;
-      int store_hit_count = 0;
-      int store_miss_count = 0;
-      int total_cycle = 0; 
-
-      int load_counter;
-      int access_counter;     
+         
 
       unsigned int bits_in_offset = 0;
       unsigned int bits_in_index = 0;
@@ -294,45 +288,54 @@ int main(int argc, char *argv[]) {
    string check_write_back = argv[5];
 
    string message = validate(argc, argv, numSets, numBlocks, blockSize, &writeBack, &writeAllocate, &lru, check_write_allocate, check_write_back);
+   
    if (message.length() != 0) {
       cerr << message;
       return -1;
    }
 
-
+   // CHANGE 
    Cache cache = Cache(numSets, numBlocks, blockSize, &writeAllocate, &writeBack, &lru);
 
-   char  op;
-   char * adrs;
-   char theRest;
+   char op;
+   string tempAddress; // to properly read in from cin
+    // to use stroul
+   string theRest;
 
    unsigned int tag;
    unsigned int index;
    unsigned int address;
-   
-   while (cin.peek() != EOF) {
+   int load_counter = 0;
+   int store_counter = 0;
+   int counter = 0;
+
+   while (cin >> op >> tempAddress >> theRest/*cin.peek() != EOF*/) {
+      
       cin.clear();
-      cin >> op >> adrs >> theRest;
+      counter++;
+      const char* adrs = tempAddress.c_str();
       address = strtoul(adrs, NULL, 16);
       tag = cache.decode_tag(address);
       index = cache.decode_index(address);
-
-      cout << tag << " " << index << "\n";
-      
+      // cout << tempAddress << endl;
       if (op == 'l') {
+         load_counter++;
          cache.load(tag, index);
-      } else {
+      } else if (op == 's') {
+         store_counter++;
          cache.store(tag, index);
       }
-
-      
    }
 
-   /*
-   TODO
-      print everything
-   */
+   cout << counter << " " << load_counter << " " << store_counter << endl;
 
+   cout << "Total loads: " << cache.load_counter << endl;
+   cout << "Total stores: " << cache.store_counter << endl;
+   cout << "Load hits: " << cache.load_hit_count << endl;
+   cout << "Load misses: " << cache.load_miss_count << endl;
+   cout << "Store hits: " << cache.store_hit_count << endl;
+   cout << "Store misses: " << cache.store_miss_count << endl;
+   cout << "Total cycles: " << cache.load_counter << endl;
    return 0;
 }
 
@@ -358,7 +361,7 @@ string validate(int argc, char * argv[], int num_sets, int num_blocks, int block
 
    if (check_write_allocate.compare("write-allocate") == 0) {
       *writeAllocate = true; //come back to it
-   } else if (check_write_back.compare("no-write-allocate") == 0) {
+   } else if (check_write_allocate.compare("no-write-allocate") == 0) {
       *writeAllocate = false; //come back to it
    } else {
       return "Error: (no-)write-allocate unspecified.\n";
