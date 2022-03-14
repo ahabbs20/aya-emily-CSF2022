@@ -101,11 +101,11 @@ class Cache {
          block_size = 0;
       };
       
-      Cache(int num_s, int num_b, int block_s, bool write_a, bool write_th, bool * lru): 
-         num_sets(num_s), num_blocks(num_b), block_size(block_s), write_allocate(write_a), write_through(write_th), lru(*lru) {
-         bits_in_offset = log_2(block_size, 0);
+      Cache(unsigned int num_s, unsigned int num_b, unsigned int block_s, bool write_a, bool write_th, bool lru): 
+         num_sets(num_s), num_blocks(num_b), block_size(block_s), write_allocate(write_a), write_through(!write_th), lru(lru) {
+         bits_in_offset = log_2(block_size);
          if (num_sets != 1) {
-            bits_in_index = log_2(num_blocks, 0);
+            bits_in_index = log_2(num_blocks);
          }
          bits_in_tag = 64 - bits_in_offset - bits_in_index;
          vector<Set> temp(num_s);
@@ -220,11 +220,14 @@ class Cache {
 
       }
 
-      int log_2(int num, int result) {
-         while (num != 1) {
+      unsigned int log_2(unsigned int num) {
+         unsigned int result = 0;
+
+         while (num != 1) { //might be wrong
             num = num >> 1;
             result++;
          }
+
          return result;
       }
 
@@ -248,8 +251,7 @@ bool isPowerOfTwo(int num) {
    return ((num & (num - 1)) == 0) && (num != 0);
 }
 
-string validate(int argc, char * argv[],  int num_sets, int num_blocks, int block_size, bool *writeBack,  
-               bool *writeAllocate, bool *lru, string check_write_allocate, string check_write_back); 
+string validate(int argc, char * argv[],  int num_sets, int num_blocks, int block_size, bool *writeBack, bool *writeAllocate, bool *lru, string check_write_allocate, string check_write_back); 
 
 int main(int argc, char *argv[]) {
    unsigned int numSets = atoi(argv[1]);
@@ -268,7 +270,7 @@ int main(int argc, char *argv[]) {
       return -1;
    }
 
-   Cache cache = Cache(numSets, numBlocks, blockSize, writeAllocate, writeBack, &lru);
+   Cache cache = Cache(numSets, numBlocks, blockSize, writeAllocate, writeBack, lru);
 
    char op;
    string tempAddress; 
@@ -350,11 +352,9 @@ string validate(int argc, char * argv[], int num_sets, int num_blocks, int block
       *lru = false;
    }
 
-   if (!writeAllocate && writeBack) { //come back to this too
+   if ((!*writeAllocate) && *writeBack) { //come back to this too
       return "Error: Cannot have no_write_allocate and write_back\n";
    }
-
-
 
    return "";
 }
