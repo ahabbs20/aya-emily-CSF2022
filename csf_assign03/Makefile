@@ -4,7 +4,7 @@
 
 
 C_SRCS = cache_funcs.cpp cache_main.cpp cache_tests.cpp tctest.c
-CFLAGS = -g -O0 -Wall -Wextra -pedantic -std=c++11 
+CFLAGS = -g -O2 -Wall -Wextra -pedantic -std=c++11 
 
 LDFLAGS = -no-pie
 
