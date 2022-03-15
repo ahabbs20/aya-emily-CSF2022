@@ -136,16 +136,18 @@ class Cache {
       void load_miss(uint32_t tag, uint32_t index) {
          creation_timestamp++;
          if (cache[index].set.size() >= num_blocks) {
+
             if (!write_through) {
                total_cycle += 100;
             }
+
             if (lru) {
                lru_remove(index);
             } else {
                fifo_remove(index);
             }
          }         
-         
+
          cache[index].set.push_back(Slot(tag, creation_timestamp, store_counter));
          cache[index].set.back().set_Access_Time(access_timestamp);
       }
