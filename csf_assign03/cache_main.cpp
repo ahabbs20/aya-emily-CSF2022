@@ -106,6 +106,7 @@ class Cache {
          bits_in_offset = log_2(block_size);
          bits_in_index = log_2(num_sets);
          bits_in_tag = 32 - bits_in_offset - bits_in_index;
+         cycle_memory = 100 * (block_size / 4);
          vector<Set> temp(num_s);
          cache = temp;
       };
@@ -138,7 +139,7 @@ class Cache {
          if (cache[index].set.size() >= num_blocks) {
 
             if (!write_through) {
-               total_cycle += 100;
+               total_cycle += cycle_memory;
             }
 
             if (lru) {
@@ -158,9 +159,9 @@ class Cache {
          int found = find(index, tag); 
          
          if (found == -1)  {
+            total_cycle += cycle_memory;
             load_miss_count++;
             load_miss(tag, index);
-            total_cycle += 100;
          } else {
             load_hit_count++;
             cache[index].set[found].set_Access_Time(access_timestamp);
@@ -213,20 +214,24 @@ class Cache {
                
          if (found == -1) {
             store_miss_count++;
-            total_cycle += 100;
             if (write_allocate) {
                load_miss(tag, index);
                access_timestamp++;
                cache[index].set.back().set_Access_Time(access_timestamp);
-               total_cycle++;
-            } 
+               total_cycle += cycle_memory;
+               if (write_through) {
+                  total_cycle += 100;
+               }
+            } else {
+               total_cycle += 100;
+            }
          } else {
-            total_cycle++;
             store_hit_count++;
             cache[index].set[found].set_Access_Time(access_timestamp);
             if (!write_through) {
                access_timestamp++;
                cache[index].set[found].set_dirty();
+               total_cycle++;
             } else {
                total_cycle += 100;
             }
@@ -237,7 +242,7 @@ class Cache {
       uint32_t log_2(uint32_t num) {
          uint32_t result = 0;
 
-         while (num != 1) { //might be wrong
+         while (num != 1) { 
             num = num >> 1;
             result++;
          }
@@ -249,6 +254,7 @@ class Cache {
       uint32_t num_sets;
       uint32_t num_blocks;
       uint32_t block_size;
+      uint32_t cycle_memory;
       bool write_allocate;
       bool write_through;
       bool lru;
