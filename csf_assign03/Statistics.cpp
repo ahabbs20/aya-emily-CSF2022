@@ -47,3 +47,4 @@ void Statistics::output_statistics() {
   cout << "Store misses: " << store_miss_count << endl;
   cout << "Total cycles: " << total_cycle << endl;
 }
+ 

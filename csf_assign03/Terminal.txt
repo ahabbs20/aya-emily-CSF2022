@@ -1,0 +1,186 @@
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 262144 1 4 write-allocate write-back fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 313747
+Load misses: 4450
+Store hits: 170121
+Store misses: 27365
+Total cycles: 3682168
+
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 write-allocate write-back fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314549
+Load misses: 3648
+Store hits: 180098
+Store misses: 17388
+Total cycles: 4738647
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 write-allocate write-back fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314549
+Load misses: 3648
+Store hits: 180098
+Store misses: 17388
+Total cycles: 4738647
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 write-allocate write-back fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314549
+Load misses: 3648
+Store hits: 180098
+Store misses: 17388
+Total cycles: 4738647
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 write-allocate write-through fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314549
+Load misses: 3648
+Store hits: 180098
+Store misses: 17388
+Total cycles: 24270349
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 no-write-allocate write-through fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 309679
+Load misses: 8518
+Store hits: 161291
+Store misses: 36195
+Total cycles: 21761879
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 no-write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 309679
+Load misses: 8518
+Store hits: 161291
+Store misses: 36195
+Total cycles: 21761879
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314549
+Load misses: 3648
+Store hits: 180098
+Store misses: 17388
+Total cycles: 24270349
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 write-allocate write-back lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314549
+Load misses: 3648
+Store hits: 180098
+Store misses: 17388
+Total cycles: 4738647
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 262144 1 4 write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 313747
+Load misses: 4450
+Store hits: 170121
+Store misses: 27365
+Total cycles: 23243847
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314549
+Load misses: 3648
+Store hits: 180098
+Store misses: 17388
+Total cycles: 24270349
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 262144 1 4 write-allocate write-through fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 313747
+Load misses: 4450
+Store hits: 170121
+Store misses: 27365
+Total cycles: 23243847
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 262144 1 4 no-write-allocate write-through fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 308728
+Load misses: 9469
+Store hits: 160009
+Store misses: 37477
+Total cycles: 21004228
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 131072 1 8 no-write-allocate write-through fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 309679
+Load misses: 8518
+Store hits: 161291
+Store misses: 36195
+Total cycles: 21761879
+
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 262144 1 4 no-write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 308728
+Load misses: 9469
+Store hits: 160009
+Store misses: 37477
+Total cycles: 21004228
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 1 262144 4 write-allocate write-back lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 313766
+Load misses: 4431
+Store hits: 170130
+Store misses: 27356
+Total cycles: 3662596
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 1 131072 8 write-allocate write-back lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314571
+Load misses: 3626
+Store hits: 180111
+Store misses: 17375
+Total cycles: 4694882
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 1 131072 8 write-allocate write-back fifo < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314571
+Load misses: 3626
+Store hits: 180111
+Store misses: 17375
+Total cycles: 4694882
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 1 262144 4 write-allocate write-back lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 313766
+Load misses: 4431
+Store hits: 170130
+Store misses: 27356
+Total cycles: 3662596
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 1 262144 4 write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 313766
+Load misses: 4431
+Store hits: 170130
+Store misses: 27356
+Total cycles: 23241066
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 1 131072 8 write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 314571
+Load misses: 3626
+Store hits: 180111
+Store misses: 17375
+Total cycles: 24263371
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 1 262144 4 no-write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 308743
+Load misses: 9454
+Store hits: 160016
+Store misses: 37470
+Total cycles: 21002743
+bergemi1804@ELaptopMain:~/CSF/aya-emily-CSF2022/csf_assign03$ ./csim 1 131072 8 no-write-allocate write-through lru < gcc.trace
+Total loads: 318197
+Total stores: 197486
+Load hits: 309698
+Load misses: 8499
+Store hits: 161302
+Store misses: 36184
+Total cycles: 21758098
