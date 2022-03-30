@@ -19,7 +19,9 @@ bool isPowerOfTwo(int num) {
    return ((num & (num - 1)) == 0) && (num != 0);
 }
 
-string validate(int argc, char * argv[],  int num_sets, int num_blocks, int block_size, bool *writeBack, bool *writeAllocate, bool *lru, string check_write_allocate, string check_write_back); 
+string validate(int argc, int num_sets, int num_blocks, int block_size,
+                bool *writeBack, bool *writeAllocate, bool *lru, string check_write_allocate,
+                 string check_write_back, string lru_string); 
 
 int main(int argc, char *argv[]) {
    uint32_t numSets = strtoul(argv[1], NULL, 10);
@@ -27,11 +29,12 @@ int main(int argc, char *argv[]) {
    uint32_t blockSize = strtoul(argv[3], NULL, 10);
    string check_write_allocate = argv[4];
    string check_write_back = argv[5];
+   string lru_string = (string) argv[6];
    bool writeBack = false;
    bool writeAllocate = false;
    bool lru = false;
    
-   string message = validate(argc, argv, numSets, numBlocks, blockSize, &writeBack, &writeAllocate, &lru, check_write_allocate, check_write_back);
+   string message = validate(argc, numSets, numBlocks, blockSize, &writeBack, &writeAllocate, &lru, check_write_allocate, check_write_back, lru_string);
    
    if (message.compare("") != 0) {
       cerr << message;
@@ -66,12 +69,11 @@ int main(int argc, char *argv[]) {
    return 0;
 }
 
-string validate(int argc, char * argv[], int num_sets, int num_blocks, int block_size, bool *writeBack, 
-               bool *writeAllocate, bool *lru, string check_write_allocate, string check_write_back) {
-   if (argc < 6) {
-      return "Error: Have not passed minimum number of arguments\n";
-   }
+bool string_equals(string s1, string s2) {
+   return s1.compare(s2) == 0;
+}
 
+string check_size_and_sets(int num_sets, int num_blocks, int block_size) {
    if (!isPowerOfTwo(num_sets)) {
       return "Error: Number of sets must be power of two.\n";
    }
@@ -84,40 +86,38 @@ string validate(int argc, char * argv[], int num_sets, int num_blocks, int block
       return "Error: block size is less than 4.\n";
    } else if (!isPowerOfTwo(block_size)) {
       return "Error: block size must be power of 2.\n";
-   }
+   }   return "";
+}
+ 
+string validate(int argc, int num_sets, int num_blocks, int block_size,
+                bool *writeBack, bool *writeAllocate, bool *lru, string check_write_allocate,
+                 string check_write_back, string lru_string) {
 
-   if (check_write_allocate.compare("write-allocate") == 0) {
-      *writeAllocate = true; //come back to it
-   } else if (check_write_allocate.compare("no-write-allocate") == 0) {
-      *writeAllocate = false; //come back to it
-   } else {
+   if (argc != 7) {
+      return "Error: Have not passed minimum number of arguments.\n";
+    
+
+   if (!string_equals(check_write_allocate, "write-allocate") && !string_equals(check_write_allocate, "no-write-allocate")) {
       return "Error: (no-)write-allocate unspecified.\n";
+   } else {
+      *writeAllocate = string_equals(check_write_allocate, "write-allocate");
    }
 
-   if (check_write_back.compare("write-through") == 0) {
-      *writeBack = false; //come back to this
-   } else if (check_write_back.compare("write-back") == 0) {
-      *writeBack = true; //come back to this
+   if (!string_equals(check_write_back, "write-through") && !string_equals(check_write_back, "write-back")) {
+     return "Error: write-back/write-through unspecified.\n";
    } else {
-      return "Error: write-back/write-through unspecified\n";
+     *writeBack = string_equals(check_write_back, "write-back"); 
    }
 
-   if (argc == 7) {
-      string lru_string = (string) argv[6];
-      if (lru_string.compare("lru") == 0) {
-         *lru = true;
-      } else if (lru_string.compare("fifo") == 0) {
-         *lru = false;
-      } else {
-         return "Error: Unable to parse parameter.";
-      }
+   if (!string_equals(lru_string, "lru") && !string_equals(lru_string, "fifo")) {
+     return "Error: Lru or fifo unspecified.\n";
    } else {
-      *lru = false;
-   }
+     *lru = string_equals(lru_string, "lru"); //come back to this
+   } 
 
    if ((!*writeAllocate) && *writeBack) { //come back to this too
-      return "Error: Cannot have no_write_allocate and write_back\n";
+      return "Error: Cannot have no_write_allocate and write_back.\n";
    }
 
-   return "";
-}
+   return check_size_and_sets(num_sets, num_blocks, block_size);
+   }
