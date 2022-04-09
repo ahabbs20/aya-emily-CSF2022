@@ -39,6 +39,7 @@ void Statistics::inc_store_miss_count() {
 }
 
 void Statistics::output_statistics() {
+  
   cout << "Total loads: " << load_counter << endl;
   cout << "Total stores: " << store_counter << endl;
   cout << "Load hits: " << load_hit_count << endl;
@@ -46,5 +47,6 @@ void Statistics::output_statistics() {
   cout << "Store hits: " << store_hit_count << endl;
   cout << "Store misses: " << store_miss_count << endl;
   cout << "Total cycles: " << total_cycle << endl;
+  
 }
  

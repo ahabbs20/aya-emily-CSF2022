@@ -95,7 +95,7 @@ string validate(int argc, int num_sets, int num_blocks, int block_size,
 
    if (argc != 7) {
       return "Error: Have not passed minimum number of arguments.\n";
-    
+   }
 
    if (!string_equals(check_write_allocate, "write-allocate") && !string_equals(check_write_allocate, "no-write-allocate")) {
       return "Error: (no-)write-allocate unspecified.\n";
@@ -121,3 +121,4 @@ string validate(int argc, int num_sets, int num_blocks, int block_size,
 
    return check_size_and_sets(num_sets, num_blocks, block_size);
    }
+   
