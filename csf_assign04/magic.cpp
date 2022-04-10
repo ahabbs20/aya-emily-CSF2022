@@ -82,7 +82,9 @@ int main(int argc, char **argv) {
 
   Elf64_Shdr current = section_header_table[0];
   Elf64_Shdr symtab_info;
+  Elf64_Shdr strtab_info;
   unsigned strtab_offset;
+  bool found_strtab = false;
 
   // For modularity, we would pass in those 3 parameters above as pointers, so that we can get them back later
 
@@ -91,15 +93,18 @@ int main(int argc, char **argv) {
 
     if (current.sh_type == SHT_SYMTAB) {
       symtab_info = current;
-    } else if (current.sh_type == SHT_STRTAB) {
-      strtab_offset = current.sh_offset; // get offset to the string table
-    }
+    } 
+
+    if (strcmp(name_table + current.sh_name, ".strtab") == 0) {
+      strtab_info = current;
+    } 
+   
     printf("Section header %d: name=%s, type=%lx, offset=%lx, size=%lx\n", i, name_table + current.sh_name, (long unsigned int) current.sh_type, current.sh_offset, current.sh_size);
   }
   
   /*Symbol Code*/
   Elf64_Sym *symtab = (Elf64_Sym *) (data_main + symtab_info.sh_offset);
-  char * str_table = (char*) (data_main + strtab_offset); // find string table, something wrong with this...
+  char * str_table = (char  *) (data_main + strtab_info.sh_offset); // find string table, something wrong with this...
   Elf64_Sym current_symbol;
 
   for (uint8_t i = 0; i < symtab_info.sh_size / symtab_info.sh_entsize; i++) {
