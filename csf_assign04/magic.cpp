@@ -13,57 +13,103 @@
 
 #include "elf_names.h"
 
+
+bool verify_if_elf(Elf64_Ehdr* elf_header) {
+  if (elf_header->e_ident[EI_MAG0] != 0x7F) { return false; }
+  else if (elf_header->e_ident[EI_MAG1] != 0x45) { return false; }
+  else if (elf_header->e_ident[EI_MAG2] != 0x4c) { return false; }
+  else if (elf_header->e_ident[EI_MAG3] != 0x46) { return false; }
+  return true;
+}
+
 int main(int argc, char **argv) {
-  // TODO: implement
+  if (argc != 2) {
+    printf("Invalid number of parameters: please run with the form './magic filename'\n");
+    return 0;
+  }
 
-  /*Ok, basically no penality for x64 only, i think we should do that and then generalise later*/
-  /* like, once we figure out x64, it's trivial to just change everything to x86 */
+  char* filename = argv[1];
+
+  int fd = open(filename, O_RDONLY);
+
+  if (fd < 0) {
+    printf("File cannot be open: check filename to ensure it is correct\n");
+    return -1;
+  }
+
+  struct stat statbuf;
+  size_t file_size = 0;
+  int rc = fstat(fd, &statbuf);
+  uint8_t* data_main = NULL;
+
+  if (rc != 0) {
+    printf("Error: unable to figure out how many bytes the file has. Please restart.\n");
+    return 0;
+  } else {
+    file_size = statbuf.st_size;
+    void* data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (data == MAP_FAILED) {
+      printf("Error: bad memory region\n");
+      return -2;
+    }
+    data_main = (uint8_t *)data;
+    //Else the pointer value points to a region of mem in which the program can access file contents
+  }
 
 
-  /*
-  Overview:
-    ELF header: Find obj file type, instruction set, endianess
-    Section Header: print out name, type, offset, and size of each section
-    
+  Elf64_Ehdr *elf_header = (Elf64_Ehdr *)data_main; //get the header
+
+  if (!verify_if_elf(elf_header)) {
+    printf("Not an ELF file");
+    return -3;
+  }
+
+  /*Print out file info*/
+  printf("Object file type: %s\nInstruction set: %s\n", get_type_name(elf_header->e_type), get_machine_name(elf_header->e_machine));
+  if (elf_header->e_ident[EI_DATA] == 1) {
+    printf("Endianness: Little endian\n");
+  } else {
+    printf("Endianness: Big endian\n");
+  }
+
+  /*Section header code*/
+  unsigned num_section_headers = elf_header->e_shnum; //get number of section headers
+  unsigned size_header = elf_header->e_shentsize;
+  unsigned offset = elf_header->e_shoff;
+
+  Elf64_Shdr *section_header_table = (Elf64_Shdr *) (data_main + offset);
+  char * name_table = (char*) (data_main + section_header_table[elf_header->e_shstrndx].sh_offset);
+
+  Elf64_Shdr current = section_header_table[0];
+  Elf64_Shdr symtab_info;
+  unsigned strtab_offset;
+
+  // For modularity, we would pass in those 3 parameters above as pointers, so that we can get them back later
+
+  for (uint8_t i = 0; i < num_section_headers; i++) {
+    current = section_header_table[i];
+
+    if (current.sh_type == SHT_SYMTAB) {
+      symtab_info = current;
+    } else if (current.sh_type == SHT_STRTAB) {
+      strtab_offset = current.sh_offset; // get offset to the string table
+    }
+    printf("Section header %d: name=%s, type=%lx, offset=%lx, size=%lx\n", i, name_table + current.sh_name, (long unsigned int) current.sh_type, current.sh_offset, current.sh_size);
+  }
   
-  
-  */
+  /*Symbol Code*/
+  Elf64_Sym *symtab = (Elf64_Sym *) (data_main + symtab_info.sh_offset);
+  char * str_table = (char*) (data_main + strtab_offset); // find string table, something wrong with this...
+  Elf64_Sym current_symbol;
 
+  for (uint8_t i = 0; i < symtab_info.sh_size / symtab_info.sh_entsize; i++) {
+    current_symbol = symtab[i];
 
-  // try to open file
-  // if cannot open, not an elf
-  // get file information using fstat syscall
-  // create mmapping
-  // -----------------------------------------------------------------------------------------
-  // decode header
-    // collect obj file type, instruction set, endianness
-    // for obj file type and instruction set:
-      // translate e_type + e_machine  to strings with get_type_name and get_machine_name
-    // for endianness -> access e_indent[ei_data] (offset 0x05), 1 = little, 2 = big
-  // -----------------------------------------------------------------------------------------
-  // Section headers
-    // Note, if the section header is for SHT_SYMTAB, note the offset/address
+    printf("Symbol %d: name=%s, size=%lx, info=%lx, other=%lx\n", i, str_table + current_symbol.st_name /*For some reason it's cutting into shstrtab*/, 
+                                                                 current_symbol.st_size, 
+                                                                 (long unsigned int) current_symbol.st_info, 
+                                                                 (long unsigned int) current_symbol.st_other);
+  }
 
-    // find e_shoff (offset x28 from start)
-    // note number of section headers in e_shnum (offset x3c)
-    // go to e_shstrndx to find index of table entry with section names (offset x3e)
-    // create object of type ELF64_Shdr
-    // for loop
-      // Section header
-      // print N (verify in range 0 to e_shnum-1)
-      // Name
-        // offset pointer by sh_name
-        // go to offset of string in .shstrtab, print name
-        // return back to location
-      // everything else (size, info, other) print with %lx -> sh_size, sh_type, sh_offset
-  // ----------------------------------------------------------------------------------------------
-  // Symbol information
-  // find sh_offset of sht_symtab(maybe when we're iterating)
-  // for loop
-    // create obj of elf
-    // Name
-        // offset pointer by sh_name
-        // go to offset of string in .shstrtab, print name
-        // return back to location
-    // print out size, info, other
+  return 0;
 }
