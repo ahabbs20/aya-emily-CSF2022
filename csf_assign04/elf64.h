@@ -1,3 +1,4 @@
+
 #ifndef ELF64_H
 #define ELF64_H
 
@@ -36,6 +37,7 @@ class elf64 {
     char * name_table;
     Elf64_Shdr symtab_info;
     Elf64_Shdr strtab_info;
+    int validating_file(int fd);
 };
 
 #endif
