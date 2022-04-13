@@ -34,6 +34,8 @@ class elf64 {
     unsigned offset;
     Elf64_Shdr *section_header_table;
     char * name_table;
+    Elf64_Shdr symtab_info;
+    Elf64_Shdr strtab_info;
 };
 
 #endif
