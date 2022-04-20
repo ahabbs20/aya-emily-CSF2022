@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
   // read response: If not ok:
   result_of_last_connection = conn.receive(return_msg);
   if (return_msg.tag.compare(TAG_ERR) == 0) {
-    cerr << "ERROR: " << return_msg.data << endl;
+    cerr << return_msg.data << endl;
     return -1;
   }
 
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
         result_of_last_connection = conn.send(Message(TAG_QUIT, ""));
         result_of_last_connection = conn.receive(return_msg);
         if (return_msg.tag.compare(TAG_OK) == 0) { // if can leave, just leave
-          return -1;
+          return 0;
         } else if (return_msg.tag.compare(TAG_ERR) == 0) { // else pass error
           cerr << "ERROR: Unable to quit, killing program\n";
           return -1;
@@ -91,19 +91,19 @@ int main(int argc, char **argv) {
  
     if (conn.get_last_result() != conn.SUCCESS) { // check to see if error arose from writing to server
       cerr << "ERROR: Unable to send message\n";
-      return -2; // connection on 
+      return -1; // connection on 
     }
     
-    // 
     result_of_last_connection = conn.receive(return_msg);
-
     if (return_msg.tag.compare(TAG_ERR) == 0) { // check if server sent any error
-      cerr << "ERROR: " << return_msg.data << endl;
+      cerr << return_msg.data << endl;
     }
 
     // empty buffer
     std::cout.flush();
   }
+
+  conn.close();
   
   return 0;
 }

@@ -27,22 +27,21 @@ struct Message {
     std::vector<std::string> result;
     // TODO: split the message data into fields separated by ':', add them
     //       to result vector
-    std::string ss("");
+    std::string ss;
     char current_character;
-    
+
     for (unsigned int i = 0; i < data.size(); i++) {
-      current_character = data[i]; 
-      if (current_character == ':') {
+      current_character = data[i];
+      if (current_character == ':' ) {
         result.push_back(ss);
-        ss == "";
+        ss = "";
       } else {
         ss += current_character;
       }
     }
-
-    if (!ss.empty()) { 
+    if (!ss.empty()) {
       result.push_back(ss);
-    }
+    } 
 
     return result;
   }

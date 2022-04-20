@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
   // read response: If not ok:
   result_of_last_connection = conn.receive(return_msg);
   if (return_msg.tag.compare(TAG_ERR) == 0) {
-    cerr << "ERROR: " << return_msg.data << endl;
+    cerr << return_msg.data << endl;
     return -1;
   }
 
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 
   result_of_last_connection = conn.receive(return_msg);
   if (return_msg.tag.compare(TAG_ERR) == 0) {
-    cerr << "ERROR: " << return_msg.data << endl;
+    cerr << return_msg.data << endl;
     return -1;
   } else if (!result_of_last_connection) {
     cerr << "Unable to perform action: Join." << endl;
@@ -69,10 +69,10 @@ int main(int argc, char **argv) {
       cerr << "Unable to perform receive message" << endl; // fatal error
       return -1;
     } else if (return_msg.tag.compare(TAG_ERR) == 0) {
-      cerr << "ERROR: " << return_msg.data << endl;
+      cerr << return_msg.data << endl;
     } else if (return_msg.tag.compare(TAG_DELIVERY) == 0) {
       std::vector<string> payload = return_msg.split_payload();
-      cout << payload[1] << ": " << payload[2] << endl;
+      cout << payload.at(1) << ": " << payload.at(2) << endl;
     }
   }
   
@@ -80,3 +80,4 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+
