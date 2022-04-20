@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 
 struct Message {
   // An encoded message may have at most this many characters,
@@ -13,6 +14,7 @@ struct Message {
 
   std::string tag;
   std::string data;
+ 
 
   Message() { }
 
@@ -25,9 +27,36 @@ struct Message {
     std::vector<std::string> result;
     // TODO: split the message data into fields separated by ':', add them
     //       to result vector
+    std::string ss("");
+    char current_character;
+    
+    for (unsigned int i = 0; i < data.size(); i++) {
+      current_character = data[i]; 
+      if (current_character == ':') {
+        result.push_back(ss);
+        ss == "";
+      } else {
+        ss += current_character;
+      }
+    }
+
+    if (!ss.empty()) { 
+      result.push_back(ss);
+    }
+
     return result;
   }
+
+  // create function which converts message to proper ASCII rep
+  std::string to_string() const {
+    std::stringstream ss("");
+    ss << tag << ":" << data << "\n";
+    return ss.str();
+  }
+
 };
+
+ 
 
 // standard message tags (note that you don't need to worry about
 // "senduser" or "empty" messages)

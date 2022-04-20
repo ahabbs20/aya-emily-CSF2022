@@ -27,6 +27,7 @@ class elf64 {
     void setup_for_print();
 
   private:
+    int fd;
     char* filename;
     uint8_t * data_main = NULL;
     Elf64_Ehdr *elf_header = NULL;
@@ -38,6 +39,7 @@ class elf64 {
     Elf64_Shdr symtab_info;
     Elf64_Shdr strtab_info;
     int validating_file(int fd);
+    void end_file();
 };
 
 #endif

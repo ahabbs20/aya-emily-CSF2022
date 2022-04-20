@@ -31,7 +31,7 @@ int elf64::validating_file(int fd) {
 }
 
 int elf64::open_file() {
-  int fd = open(filename, O_RDONLY);
+  fd = open(filename, O_RDONLY);
 
   if (fd < 0) {
     printf("File cannot be open: check filename to ensure it is correct\n");
@@ -102,4 +102,10 @@ void elf64::print_symbols() {
                                                                  (long unsigned int) current_symbol.st_info, 
                                                                  (long unsigned int) current_symbol.st_other);
   }
+
+  end_file(); // close file
+}
+
+void elf64::end_file() {
+    close(fd);
 }

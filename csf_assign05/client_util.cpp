@@ -7,6 +7,7 @@
 // string trim functions shamelessly stolen from
 // https://www.techiedelight.com/trim-string-cpp-remove-leading-trailing-spaces/
 
+
 const std::string WHITESPACE = " \n\r\t\f\v";
 
 std::string ltrim(const std::string &s) {
@@ -22,3 +23,4 @@ std::string rtrim(const std::string &s) {
 std::string trim(const std::string &s) {
   return rtrim(ltrim(s));
 }
+

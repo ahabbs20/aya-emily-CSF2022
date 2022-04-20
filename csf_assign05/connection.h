@@ -7,7 +7,8 @@ struct Message;
 class Connection {
 public:
   // enumeration type describing reasons why a call to
-  // send or receive failed
+  // send or receive faile
+  
   enum Result {
     SUCCESS,      // send or receive was successful
     EOF_OR_ERROR, // EOF or error receiving or sending data

@@ -9,7 +9,7 @@ CC = gcc
 CFLAGS = -g -Wall -std=c11 -D_POSIX_C_SOURCE=200809L
 
 # C++ source/object files used only for the server
-CXX_SERVER_SRCS = server.cpp server_main.cpp message_queue.cpp room.cpp
+CXX_SERVER_SRCS = server.cpp server_main.cpp message_queue.cpp room.cpp client_util.cpp
 CXX_SERVER_OBJS = $(CXX_SERVER_SRCS:.cpp=.o)
 
 # C++ source/object files used only for the receiver
@@ -62,7 +62,7 @@ receiver : $(CXX_RECEIVER_OBJS) $(CXX_COMMON_OBJS) $(CXX_CLIENT_OBJS) $(C_COMMON
 .PHONY: solution.zip
 solution.zip :
 	rm -f $@
-	zip -9r $@ Makefile *.cpp *.c README.txt
+	zip -9r $@ Makefile *.cpp *.c *.h README.txt
 
 clean :
 	rm -f *.o depend.mak
