@@ -42,6 +42,8 @@ public:
   bool send(const Message &msg);
   bool receive(Message &msg);
 
+  int error_and_return(std::string to_print, int return_val);
+
   Result get_last_result() const { return m_last_result; }
 
 private:
