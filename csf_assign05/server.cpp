@@ -73,4 +73,15 @@ void Server::handle_client_requests() {
 Room *Server::find_or_create_room(const std::string &room_name) {
   // TODO: return a pointer to the unique Room object representing
   //       the named chat room, creating a new one if necessary
+  Room * found = m_rooms.at(room_name);
+
+  if (found != NULL) {
+    return found;
+  } else {
+    Room temp = Room(room_name);
+    m_rooms.emplace(room_name, temp);
+    return &temp;
+  }
+
+  
 }
