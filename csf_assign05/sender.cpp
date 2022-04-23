@@ -51,7 +51,8 @@ int cleanup(Connection &conn) {
   return 0;
 }
 
-//Main loop done here- looped reading in of input
+//Main loop done here- looped handling of input
+//returns 1 if all is well, 0 if exit main, and -1 if exit due to error
 int while_loop(string &input, bool result_of_last_connection, Connection &conn, Message &return_msg){
   cin >> input;
   if (input[0] != '/') { // check if it is not a command
@@ -85,6 +86,7 @@ int main(int argc, char **argv) {
     return conn.error_and_return("Usage: ./sender [server_address] [port] [username]\n", 1);
   }
 
+  //initialize important info
   string server_hostname = argv[1];
   int server_port = std::stoi(argv[2]);
   string username = argv[3];
