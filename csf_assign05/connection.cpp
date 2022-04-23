@@ -13,13 +13,10 @@
 Connection::Connection(): m_fd(-1), m_last_result(SUCCESS) {
 }
 
-/*Done*/
 Connection::Connection(int fd): m_fd(fd), m_last_result(SUCCESS) {
-   // TODO: call rio_readinitb to initialize the rio_t object
   rio_readinitb(&m_fdbuf, m_fd);
 }
 
-/*done?*/
 void Connection::connect(const std::string &hostname, int port) {
   //get port
   std::string p = std::to_string(port);
@@ -34,29 +31,23 @@ void Connection::connect(const std::string &hostname, int port) {
   rio_readinitb(&m_fdbuf, m_fd);
 }
 
-/*Done*/
+
 Connection::~Connection() {
   close();
 }
 
-/*Done?*/
+
 bool Connection::is_open() const {
   return m_fd >= 0;
 }
 
-/*Done*/
 void Connection::close() {
   if (is_open()) {
     Close(m_fd); 
   }
 }
 
-/*Done*/
 bool Connection::send(const Message &msg) {
-  // TODO: send a message
-  // return true if successful, false if not
-  // make sure that m_last_result is set appropriately
-
   std::string payload = msg.to_string(); 
   ssize_t result = rio_writen(m_fd, payload.c_str(), payload.length()); 
 
@@ -69,15 +60,7 @@ bool Connection::send(const Message &msg) {
   return true;
 }
 
-/*Done*/
 bool Connection::receive(Message &msg) {
-  // TODO: send a message, storing its tag and in msg
-  // return true if successful, false if notdata
-  // make sure that m_last_result is set appropriately
-
-  // block on tcp socket until can read message
-  // read message into message type
-
   char buffer[255];
   ssize_t i = rio_readlineb(&m_fdbuf, buffer, 255);
   if (i < 1) {

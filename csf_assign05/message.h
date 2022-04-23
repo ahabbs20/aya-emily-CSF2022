@@ -25,8 +25,6 @@ struct Message {
   // split using ':' as the separator
   std::vector<std::string> split_payload() const {
     std::vector<std::string> result;
-    // TODO: split the message data into fields separated by ':', add them
-    //       to result vector
     std::string ss;
     char current_character;
 
