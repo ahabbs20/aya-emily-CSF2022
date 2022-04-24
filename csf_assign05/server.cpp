@@ -54,20 +54,31 @@ Server::Server(int port)
   : m_port(port)
   , m_ssock(-1) {
   // TODO: initialize mutex
+  pthread_mutex_init(&m_lock, NULL);
 }
 
 Server::~Server() {
   // TODO: destroy mutex
+  pthread_mutex_destroy(&m_lock);
 }
 
 bool Server::listen() {
   // TODO: use open_listenfd to create the server socket, return true
   //       if successful, false if not
+  int server_fd = open_listenfd(std::to_string(m_port).c_str());
+  if (server_fd < 0) {
+    return false;
+  }
+  return true;
 }
 
 void Server::handle_client_requests() {
   // TODO: infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
+
+  while (1) {
+    //TODO
+  }
 }
 
 Room *Server::find_or_create_room(const std::string &room_name) {
