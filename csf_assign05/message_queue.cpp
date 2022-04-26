@@ -18,8 +18,8 @@ void MessageQueue::enqueue(Message *msg) {
   // TODO: put the specified message on the queue
   // be sure to notify any thread waiting for a message to be
   // available by calling sem_post
-  sem_post(&m_avail);
   m_messages.push_back(msg);
+  sem_post(&m_avail);
 }
 
 Message *MessageQueue::dequeue() {

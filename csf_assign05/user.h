@@ -8,7 +8,7 @@ struct User {
   std::string username;
 
   // queue of pending messages awaiting delivery
-  MessageQueue mqueue;
+  MessageQueue *mqueue;
 
   User(const std::string &username) : username(username) { }
 };
