@@ -4,9 +4,9 @@
 # in the skeleton project
 
 CXX = g++
-CXXFLAGS = -g -Wall -std=c++14 -D_POSIX_C_SOURCE=200809L
+CXXFLAGS = -g -O2 -Wall -std=c++14 -D_POSIX_C_SOURCE=200809L
 CC = gcc
-CFLAGS = -g -Wall -std=c11 -D_POSIX_C_SOURCE=200809L
+CFLAGS = -g -O2 -Wall -std=c11 -D_POSIX_C_SOURCE=200809L
 
 # C++ source/object files used only for the server
 CXX_SERVER_SRCS = server.cpp server_main.cpp message_queue.cpp room.cpp client_util.cpp

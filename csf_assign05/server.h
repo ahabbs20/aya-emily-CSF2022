@@ -4,17 +4,28 @@
 #include <map>
 #include <string>
 #include <pthread.h>
+#include "connection.h"
+class User;
 class Room;
-
+class Message;
 class Server {
-public:
-  typedef struct {
-    Connection * connection;
-    Server * server;
-  } Conn_Info;
 
+public:
   Server(int port);
   ~Server();
+
+  struct Conn_Info {
+    Connection * connection;
+    Server * server;
+
+    Conn_Info() {
+      
+    }
+
+    ~Conn_Info() {
+      delete connection;
+    }
+  };
 
   bool listen();
 
@@ -38,6 +49,14 @@ private:
   int server_fd;
   RoomMap m_rooms;
   pthread_mutex_t m_lock;
+
+  // do we need a function that matches user to room? instead of room directly
+
+  // functions to aid with sending
+  bool server_join(User * user, Conn_Info * conn, std::string &room_name);
+  void server_leave(User * user, Conn_Info * conn, std::string &room_name);
+  void server_sendall(User * user, Conn_Info * conn, Message &input, std::string &room_name);
+
 };
 
 #endif // SERVER_H

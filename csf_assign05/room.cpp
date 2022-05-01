@@ -3,35 +3,35 @@
 #include "message_queue.h"
 #include "user.h"
 #include "room.h"
+#include <sstream>
 
 Room::Room(const std::string &room_name)
   : room_name(room_name) {
-  // TODO: initialize the mutex
-  pthread_mutex_init(&lock, NULL);
+  pthread_mutex_init(&lock, NULL); //initialize mutex
 }
 
 Room::~Room() {
-  // TODO: destroy the mutex
-  pthread_mutex_destroy(&lock);
+  pthread_mutex_destroy(&lock); //destroy mutex
 }
 
 void Room::add_member(User *user) {
-  // TODO: add User to the room
-  members.insert(user);
+  Guard g(lock); //lock mutex
+  members.insert(user); //add user to user set
 }
 
 void Room::remove_member(User *user) {
-  // TODO: remove User from the room
-  members.erase(user);
+  Guard g(lock); //lock mutex
+  members.erase(user); //remove user from user set
 }
 
 void Room::broadcast_message(const std::string &sender_username, const std::string &message_text) {
-  // TODO: send a message to every (receiver) User in the room
-  // TODO: look this over... fix so it just sends to receivers
-  for (User * member : members) {
-    if (sender_username.compare(member->username) != 0) {
-      Message toSend = Message(TAG_DELIVERY, message_text);
-      member->mqueue->enqueue(&toSend);
+  Guard g(lock); //lock mutex
+  for (User * member : members) { //iterate through all users
+    if (sender_username.compare(member->username) != 0) { //if sender isn't the current member, send the message
+      std::stringstream ss;
+      ss << room_name << ':' << sender_username << ':' << message_text; //get message text into ss
+      Message * toSend = new Message(TAG_DELIVERY, ss.str()); //set message to stringstream
+      member->mqueue->enqueue(toSend); //enqueue this message 
     }
   }
 
