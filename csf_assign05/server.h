@@ -28,8 +28,8 @@ public:
   };
   
   /*
-  Information and methods shared by both chat_with_receiver 
-  and chat_with_sender.
+  Parent class with commonalities between 
+  chat_receiver and chat_sender
   */
   class Chat {
     public: 
@@ -50,40 +50,34 @@ public:
   };
 
   //formerly chat_with_receiver interaction stuff
-  class Chat_Receiver: public Chat{
+  class Chat_Receiver: protected Chat{
     public:
       Chat_Receiver(Conn_Info * con, User * us, Message * in) {
         conn = con;
         user = us;
         input = in;
       }
-
-      //send any response messages necessary before looped processing
-      void send_response_messages();
-
-      //looped processing of incoming messages
-      void loop();
+      
+      void receive();
     private:
+      void send_response_messages();
+      void loop();
       Message * input;
   };
 
   //formerly chat_with_sender interaction stuff
-  class Chat_Sender: public Chat{
+  class Chat_Sender: protected Chat{
     public:
       Chat_Sender(Conn_Info * con, User * us) {
         conn = con; 
         user = us; 
       }
 
-      //main sender loop
       void loop();
-      
-      //server interaction functions not inherited from chat class
+
+      //bool server_join(std::string& room_name);
       void server_leave(std::string& room_name);
       void server_sendall(Message &input, std::string &room_name);
-    private:
-      Conn_Info * conn; 
-      User * user; 
   };
 
   bool listen();

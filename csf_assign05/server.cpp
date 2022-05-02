@@ -123,7 +123,7 @@ Room* Server::find_or_create_room(const std::string &room_name) {
   return room;
 }
 
-//server_join for both receiver and sender (from parent class for both)
+//server_join for both receiver and sender (from parent class Chat for both)
 bool Server::Chat::server_join(std::string& room_name) {
   if (room_name.empty()) { // join must specify user. 
     conn->connection->send(Message(TAG_ERR, "Join message must specify room"));
@@ -136,22 +136,23 @@ bool Server::Chat::server_join(std::string& room_name) {
 }
 
 /*
-  Communicate with receiver
+  Communicate with receiver- uses Chat_Receiver class
 */
 void Server::chat_with_receiver(User * user, Conn_Info * conn) {
   // join 
   Message input;
   conn->connection->receive(input);
-
   Chat_Receiver receiver = Chat_Receiver(conn, user, &input);
-  
-  //receiver_send_response_messages(user, conn, &input);
-  receiver.send_response_messages();
-  //receiver_loop(user, conn);
-  receiver.loop();
+  receiver.receive();
 }
 
-//send response in receiver 
+//public handle of the 2 parts to the function (send response messages and loop)
+void Server::Chat_Receiver::receive() {
+  send_response_messages();
+  loop();
+}
+
+//send response messages in receiver if necessary (and do any action associated with them)
 void Server::Chat_Receiver::send_response_messages() {
   if (input->tag.compare(TAG_JOIN) != 0) { // first message from receiver must be join
     conn->connection->send(Message(TAG_ERR, "Inorder to receive messages, must be a member of a room"));
@@ -173,13 +174,12 @@ void Server::Chat_Receiver::loop() {
 }
 
 /*
-  Process sender messages
+  Process sender messages- uses Chat_Sender class 
 */
 void Server::chat_with_sender(User * user, Conn_Info * conn) {
-
   Chat_Sender sender = Chat_Sender(conn, user);
-
   sender.loop();
+
 }
 
 //most of the sender processing
@@ -231,4 +231,3 @@ void Server::Chat_Sender::server_sendall(Message &input, std::string &room_name)
   result->broadcast_message(user->username, input.data);  // broadcast
   conn->connection->send(Message(TAG_OK, "Able to delivery message")); // send ok message
 }
-
