@@ -123,74 +123,8 @@ Room* Server::find_or_create_room(const std::string &room_name) {
   return room;
 }
 
-/*
-  Communicate with 
-*/
-void Server::chat_with_receiver(User * user, Conn_Info * conn) {
-  // join 
-  Message input;
-  conn->connection->receive(input);
-
-  if (input.tag.compare(TAG_JOIN) != 0) { // first message from receiver must be join
-    conn->connection->send(Message(TAG_ERR, "Inorder to receive messages, must be a member of a room"));
-  } else if (server_join(user, conn, input.data)) { // join a room if a room is specified
-    conn->connection->send(Message(TAG_OK, "Able to join room")); // join a room was successful
-  }
-
-  // user is now in room
-  while (1) {
-    Message * msg = user->mqueue->dequeue(); // dequeue messages if available
-    if (msg != nullptr) { // if there is no issue with the message (ie message is not properly deallocated)
-      conn->connection->send(*msg);
-      delete(msg);
-    }
-  }  
-}
-
-/*
-  Process sender messages
-*/
-void Server::chat_with_sender(User * user, Conn_Info * conn) {
-  Message input;
-  std::string room_name = "";
-  bool result; 
-
-  while (1) {
-    conn->connection->receive(input);
-    if (input.tag.compare(TAG_JOIN) == 0) {
-      if (room_name.compare("") != 0) { // if in a room, leave
-        server_leave(user, conn, room_name);
-      }
-      room_name = input.data;
-      result = server_join(user, conn, room_name); 
-      if (result) { // no error was sent, thus send ok message instead. 
-        conn->connection->send(Message(TAG_OK, "Able to join room"));
-      }
-    } else if (input.tag.compare(TAG_LEAVE) == 0) { 
-      if (room_name.compare("") != 0) { // if in a room, leave, else do nothing
-        server_leave(user, conn, room_name);
-        conn->connection->send(Message(TAG_OK, "Able to leave room"));
-        room_name = ""; // mark as not in room
-      }
-    } else if (input.tag.compare(TAG_QUIT) == 0) {
-      if (room_name.compare("") != 0) { // if in a room, leave
-        server_leave(user, conn, room_name);
-      }
-      conn->connection->send(Message(TAG_OK, "Able to quit room"));
-      break;  
-    } else if (input.tag.compare(TAG_SENDALL) == 0) {
-      server_sendall(user, conn, input, room_name); // send message to everyone
-    } else {
-      conn->connection->send(Message(TAG_ERR, "Unable to parse tag."));
-    }
-  }
-  
-}
-
-/*
-  Process join request
-*/
-bool Server::server_join(User * user, Conn_Info * conn, std::string& room_name) {
+//server_join for both receiver and sender (from parent class for both)
+bool Server::Chat::server_join(std::string& room_name) {
   if (room_name.empty()) { // join must specify user. 
     conn->connection->send(Message(TAG_ERR, "Join message must specify room"));
     return false; // unsuccessful join
@@ -202,17 +136,97 @@ bool Server::server_join(User * user, Conn_Info * conn, std::string& room_name) 
 }
 
 /*
-  Process leave request
+  Communicate with receiver
 */
-void Server::server_leave(User * user, Conn_Info * conn, std::string &room_name) {
+void Server::chat_with_receiver(User * user, Conn_Info * conn) {
+  // join 
+  Message input;
+  conn->connection->receive(input);
+
+  Chat_Receiver receiver = Chat_Receiver(conn, user, &input);
+  
+  //receiver_send_response_messages(user, conn, &input);
+  receiver.send_response_messages();
+  //receiver_loop(user, conn);
+  receiver.loop();
+}
+
+//send response in receiver 
+void Server::Chat_Receiver::send_response_messages() {
+  if (input->tag.compare(TAG_JOIN) != 0) { // first message from receiver must be join
+    conn->connection->send(Message(TAG_ERR, "Inorder to receive messages, must be a member of a room"));
+  } else if (server_join(input->data)) { // join a room if a room is specified
+    conn->connection->send(Message(TAG_OK, "Able to join room")); // join a room was successful
+  }
+}
+
+//receiver loop
+void Server::Chat_Receiver::loop() {
+  //user is now in room
+  while (true) {
+    Message * msg = user->mqueue->dequeue(); // dequeue messages if available
+    if (msg != nullptr) { // if there is no issue with the message (ie message is not properly deallocated)
+      conn->connection->send(*msg);
+      delete(msg);
+    }
+  }
+}
+
+/*
+  Process sender messages
+*/
+void Server::chat_with_sender(User * user, Conn_Info * conn) {
+
+  Chat_Sender sender = Chat_Sender(conn, user);
+
+  sender.loop();
+}
+
+//most of the sender processing
+void Server::Chat_Sender::loop() {
+  Message input;
+  std::string room_name = "";
+  bool result;
+
+  while (true) {
+    conn->connection->receive(input);
+    if (input.tag.compare(TAG_JOIN) == 0) {
+      if (room_name.compare("") != 0) { // if in a room, leave
+        server_leave(room_name);
+      }
+      room_name = input.data;
+      result = server_join(room_name); 
+      if (result) { // no error was sent, thus send ok message instead. 
+        conn->connection->send(Message(TAG_OK, "Able to join room"));
+      }
+    } else if (input.tag.compare(TAG_LEAVE) == 0) { 
+      if (room_name.compare("") != 0) { // if in a room, leave, else do nothing
+        server_leave(room_name);
+        conn->connection->send(Message(TAG_OK, "Able to leave room"));
+        room_name = ""; // mark as not in room
+      }
+    } else if (input.tag.compare(TAG_QUIT) == 0) {
+      if (room_name.compare("") != 0) { // if in a room, leave
+        server_leave(room_name);
+      }
+      conn->connection->send(Message(TAG_OK, "Able to quit room"));
+      break;  
+    } else if (input.tag.compare(TAG_SENDALL) == 0) {
+      server_sendall(input, room_name); // send message to everyone
+    } else {
+      conn->connection->send(Message(TAG_ERR, "Unable to parse tag."));
+    }
+  }
+}
+
+//leave server (for sender)
+void Server::Chat_Sender::server_leave(std::string& room_name) {
   Room * result = conn->server->find_or_create_room(room_name);
   result->remove_member(user); // remove member
 }
 
-/*
-  Process send all request
-*/
-void Server::server_sendall(User * user, Conn_Info * conn, Message &input, std::string &room_name) {
+//sendall (for sender)
+void Server::Chat_Sender::server_sendall(Message &input, std::string &room_name) {
   Room * result = conn->server->find_or_create_room(room_name); // find room
   result->broadcast_message(user->username, input.data);  // broadcast
   conn->connection->send(Message(TAG_OK, "Able to delivery message")); // send ok message

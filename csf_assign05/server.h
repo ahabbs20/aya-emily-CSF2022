@@ -26,6 +26,65 @@ public:
       delete connection;
     }
   };
+  
+  /*
+  Information and methods shared by both chat_with_receiver 
+  and chat_with_sender.
+  */
+  class Chat {
+    public: 
+      Chat(Conn_Info * con, User * us) {
+        conn = con;
+        user = us;
+      }
+
+      Chat() {
+        
+      }
+
+    bool server_join(std::string& room_name);
+
+    protected:
+      Conn_Info * conn; 
+      User * user;
+  };
+
+  //formerly chat_with_receiver interaction stuff
+  class Chat_Receiver: public Chat{
+    public:
+      Chat_Receiver(Conn_Info * con, User * us, Message * in) {
+        conn = con;
+        user = us;
+        input = in;
+      }
+
+      //send any response messages necessary before looped processing
+      void send_response_messages();
+
+      //looped processing of incoming messages
+      void loop();
+    private:
+      Message * input;
+  };
+
+  //formerly chat_with_sender interaction stuff
+  class Chat_Sender: public Chat{
+    public:
+      Chat_Sender(Conn_Info * con, User * us) {
+        conn = con; 
+        user = us; 
+      }
+
+      //main sender loop
+      void loop();
+      
+      //server interaction functions not inherited from chat class
+      void server_leave(std::string& room_name);
+      void server_sendall(Message &input, std::string &room_name);
+    private:
+      Conn_Info * conn; 
+      User * user; 
+  };
 
   bool listen();
 
@@ -34,6 +93,9 @@ public:
   Room *find_or_create_room(const std::string &room_name);
   void chat_with_sender(User * user, Conn_Info * conn);
   void chat_with_receiver(User * user, Conn_Info * conn);
+
+  void receiver_send_response_messages(User * user, Conn_Info * conn, Message * input);
+  void receiver_loop(User * user, Conn_Info * conn);
 
 private:
   // prohibit value semantics
